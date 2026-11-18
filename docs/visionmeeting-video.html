@@ -1,0 +1,1062 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+CiAgPCEtLSBMdWNpZGUgInZpZGVvIiAobHVjaWRlLXN0YXRpYyB2MC40NjAuMCwgSVNDKSBvbiBhY2NlbnQgYmFja2dyb3VuZCAtLT4KICA8cmVjdCB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHJ4PSI1IiBmaWxsPSIjMzE1OUQ5Ii8+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNCA0KSBzY2FsZSgwLjY2NjcpIiBmaWxsPSJub25lIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMi4yNSIKICAgICBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogICAgPHBhdGggZD0ibTE2IDEzIDUuMjIzIDMuNDgyYS41LjUgMCAwIDAgLjc3Ny0uNDE2VjcuODdhLjUuNSAwIDAgMC0uNzUyLS40MzJMMTYgMTAuNSIvPgogICAgPHJlY3QgeD0iMiIgeT0iNiIgd2lkdGg9IjE0IiBoZWlnaHQ9IjEyIiByeD0iMiIvPgogIDwvZz4KPC9zdmc+Cg==">
+<style>body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>VisionMeeting 움직이는 설명서</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<script>
+  try {
+    const saved = localStorage.getItem("visionmeeting-explainer-theme");
+    if (saved === "light" || saved === "dark") document.documentElement.dataset.theme = saved;
+  } catch (error) { /* 저장소를 못 쓰면 기본(어두운 테마) */ }
+</script>
+<style>
+/* Layout: 머리 → 16:9 무대(프레임 단위 애니메이션, 자막 줄) + 재생 막대 → 장면 칩 → 장면별 해설(글).
+   토큰은 프로젝트 DESIGN.md·static/style.css 값 그대로. 어두운 테마가 기본(Q22), 밝은 테마는 전환 버튼. */
+:root {
+  --bg: #10151C;
+  --surface: #1A2029;
+  --surface-2: #141A22;
+  --surface-strong: #2A323D;
+  --border: #2A323D;
+  --border-strong: #5E6A79;
+  --text: #E6EAF0;
+  --text-dim: #9AA6B4;
+  --accent: #5B82E8;
+  --accent-soft: #22304F;
+  --on-accent: #10151C;
+  --ok: #2FA968;
+  --warn: #C79A3A;
+  --danger: #E4655F;
+  --font: "Segoe UI", "Malgun Gothic", system-ui, sans-serif;
+  --mono: "Cascadia Mono", Consolas, "D2Coding", ui-monospace, monospace;
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --bg: #eef2f7;
+  --surface: #ffffff;
+  --surface-2: #f6f8fb;
+  --surface-strong: #e8eef7;
+  --border: #d7dee8;
+  --border-strong: #aeb9c8;
+  --text: #172033;
+  --text-dim: #5c6a7d;
+  --accent: #3159d9;
+  --accent-soft: #eaf0ff;
+  --on-accent: #ffffff;
+  --ok: #137a4e;
+  --warn: #9a5700;
+  --danger: #c63636;
+  color-scheme: light;
+}
+
+html { background: var(--bg); }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.6 var(--font);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 48px;
+}
+button, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.wrap { max-width: 1100px; margin: 0 auto; display: grid; gap: 16px; }
+
+header { display: flex; gap: 16px; align-items: flex-start; justify-content: space-between; }
+header .lead { min-width: 0; }
+h1 { margin: 0; font-size: 1.6rem; line-height: 1.3; text-wrap: balance; }
+.sub { margin: 4px 0 0; color: var(--text-dim); max-width: 65ch; }
+.kbd { font-family: var(--mono); font-size: .85em; padding: 0 6px; border: 1px solid var(--border-strong); border-radius: 4px; }
+.icon-btn {
+  flex: none; width: 40px; height: 40px; display: grid; place-items: center;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px; cursor: pointer;
+}
+.icon-btn:hover { border-color: var(--border-strong); }
+.icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* 무대 */
+.player { display: grid; gap: 10px; }
+/* 그림(16:9) 아래에 자막 띠를 따로 두어 그림을 가리지 않는다 */
+.stage-wrap {
+  width: 100%; max-width: 100%;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+  container-type: inline-size;
+}
+.screen { position: relative; }
+#stage { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; }
+.caption-line {
+  margin: 0; min-height: 3.2em; display: flex; align-items: center; justify-content: center;
+  border-top: 1px solid var(--border); background: var(--surface);
+  color: var(--text); font-size: clamp(14px, 1.9cqw, 21px); font-weight: 600; line-height: 1.45;
+  padding: .3em 1em; text-align: center; text-wrap: balance;
+}
+.big-play {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: clamp(56px, 9cqw, 88px); aspect-ratio: 1; border-radius: 50%; border: 0; cursor: pointer;
+  background: var(--accent); color: var(--on-accent); display: grid; place-items: center;
+  box-shadow: 0 6px 24px color-mix(in srgb, var(--bg) 60%, transparent);
+}
+.big-play .icon { width: 42%; height: 42%; fill: currentColor; stroke: none; }
+.big-play.replay .icon { fill: none; stroke: currentColor; stroke-width: 2.4; }
+
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; }
+.ctrl {
+  height: 36px; min-width: 36px; padding: 0 10px; display: inline-flex; align-items: center; gap: 6px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px; cursor: pointer;
+}
+.ctrl:hover { border-color: var(--border-strong); }
+.ctrl .icon { width: 18px; height: 18px; }
+.ctrl .icon.solid { fill: currentColor; stroke: none; }
+.time { font-variant-numeric: tabular-nums; color: var(--text-dim); font-size: .9rem; min-width: 92px; }
+.track {
+  flex: 1 1 320px; min-width: 0; height: 28px; display: flex; gap: 3px; align-items: center;
+  cursor: pointer; touch-action: none; border-radius: 6px;
+}
+.seg { position: relative; height: 8px; background: var(--surface-strong); border-radius: 4px; overflow: hidden; }
+.seg.on { height: 12px; }
+.seg i { position: absolute; inset: 0 auto 0 0; background: var(--accent); }
+.speed { height: 36px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0 8px; }
+
+.chapters { display: flex; flex-wrap: wrap; gap: 8px; }
+.chap {
+  display: inline-flex; align-items: baseline; gap: 6px; padding: 6px 12px; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 999px; font-size: .9rem;
+}
+.chap b { font-variant-numeric: tabular-nums; color: var(--text-dim); font-weight: 600; }
+.chap[aria-current="true"] { background: var(--accent-soft); border-color: var(--accent); }
+.chap[aria-current="true"] b { color: var(--accent); }
+
+/* 장면별 해설 */
+.script { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; }
+.script h2 { margin: 0 0 4px; font-size: 1.15rem; }
+.script > p { margin: 0 0 12px; color: var(--text-dim); }
+.script ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 14px; counter-reset: s; }
+.script li { counter-increment: s; display: grid; grid-template-columns: 2.2em minmax(0, 1fr); gap: 0 8px; }
+.script li::before { content: counter(s); font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+.script h3 { margin: 0; font-size: 1rem; }
+.script li p { margin: 2px 0 0; max-width: 70ch; }
+.script .note { color: var(--text-dim); font-size: .875rem; }
+footer { color: var(--text-dim); font-size: .8125rem; }
+
+/* SVG 무대 안 — 색은 모두 토큰 */
+.bg-dot { fill: var(--border); }
+.f-surface { fill: var(--surface); } .f-bg { fill: var(--bg); } .f-strong { fill: var(--surface-strong); }
+.f-soft { fill: var(--accent-soft); } .f-accent { fill: var(--accent); } .f-ok { fill: var(--ok); }
+.f-warn { fill: var(--warn); } .f-danger { fill: var(--danger); } .f-text { fill: var(--text); }
+.tile { fill: color-mix(in srgb, var(--text) 9%, var(--bg)); }
+.s-line { stroke: var(--border-strong); stroke-width: 1.5; }
+.s-accent { stroke: var(--accent); stroke-width: 2; }
+.nofill { fill: none; }
+.t { fill: var(--text); font-family: var(--font); }
+.t-dim { fill: var(--text-dim); } .t-accent { fill: var(--accent); } .t-ok { fill: var(--ok); }
+.t-warn { fill: var(--warn); } .t-danger { fill: var(--danger); }
+.t-xl { font-size: 68px; font-weight: 700; letter-spacing: -0.5px; }
+.t-lg { font-size: 32px; font-weight: 700; }
+.t-md { font-size: 22px; font-weight: 600; }
+.t-sm { font-size: 17px; font-weight: 500; }
+.t-xs { font-size: 14px; font-weight: 500; }
+.t-b { font-weight: 700; }
+.mono { font-family: var(--mono); }
+.chip-soft { fill: var(--accent-soft); } .chip-flat { fill: var(--surface-strong); }
+.b-accent { fill: var(--accent); } .b-ghost { fill: var(--surface-strong); } .b-danger { fill: var(--danger); }
+.b-off { fill: var(--surface-strong); opacity: .55; }
+.bt-accent, .bt-danger { fill: var(--on-accent); font-weight: 700; }
+.bt-ghost { fill: var(--text); font-weight: 600; } .bt-off { fill: var(--text-dim); }
+.person { fill: var(--text-dim); opacity: .6; }
+.wire { fill: none; stroke: var(--accent); stroke-width: 3; stroke-dasharray: 1; }
+.wire.ok { stroke: var(--ok); }
+.wire.dim { stroke: var(--text-dim); stroke-width: 2.5; }
+.sig { fill: none; stroke: var(--text-dim); stroke-width: 2; stroke-dasharray: 6 7; }
+.pkt { fill: var(--accent); } .pkt.ok { fill: var(--ok); } .pkt.dim { fill: var(--text-dim); }
+.xmark { stroke: var(--danger); stroke-width: 7; stroke-linecap: round; }
+.ripple { fill: none; stroke: var(--accent); stroke-width: 3; }
+.cursor { fill: var(--text); stroke: var(--bg); stroke-width: 1.5; }
+.wave { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; }
+.interim { fill: var(--bg); stroke: var(--text-dim); stroke-width: 1.5; stroke-dasharray: 6 5; }
+.final { fill: var(--surface); stroke: var(--accent); stroke-width: 2; }
+.lock-arc { fill: none; stroke: var(--ok); stroke-width: 2.5; }
+.check { fill: none; stroke: var(--on-accent); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.split { fill: var(--border-strong); } .split.on { fill: var(--accent); }
+
+[hidden] { display: none !important; }
+@media (max-width: 640px) {
+  .script { padding: 16px; }
+  .time { min-width: 0; }
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-play" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"></polygon></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"></rect><rect x="14" y="4" width="4" height="16" rx="1"></rect></symbol>
+  <symbol id="i-replay" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></symbol>
+</svg>
+
+<div class="wrap">
+  <header>
+    <div class="lead">
+      <h1>VisionMeeting 움직이는 설명서</h1>
+      <p class="sub">서버 켜기부터 회의 정리까지 1분 40초. ▶ 를 누르거나 아래 장면을 고르세요.
+        <span class="kbd">Space</span> 재생·멈춤, <span class="kbd">←</span> <span class="kbd">→</span> 5초 이동.</p>
+    </div>
+    <button type="button" class="icon-btn" id="theme-btn" aria-label="화면 테마 바꾸기" title="화면 테마 바꾸기">
+      <svg class="icon"><use href="#i-sun"></use></svg>
+    </button>
+  </header>
+
+  <section class="player" aria-label="동작 설명 영상">
+    <div class="stage-wrap" id="stage-wrap">
+      <div class="screen">
+      <svg id="stage" viewBox="0 0 1280 720" role="img" aria-label="VisionMeeting 동작을 보여 주는 움직이는 그림. 내용은 아래 장면별 해설과 같습니다.">
+        <defs>
+          <pattern id="dots" width="32" height="32" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.2" class="bg-dot"></circle></pattern>
+        </defs>
+        <rect width="1280" height="720" fill="url(#dots)"></rect>
+      </svg>
+      <button type="button" class="big-play" id="big-play" aria-label="처음부터 재생">
+        <svg class="icon"><use href="#i-play"></use></svg>
+      </button>
+      </div>
+      <p class="caption-line" id="caption-line" aria-live="off">&nbsp;</p>
+    </div>
+    <div class="controls">
+      <button type="button" class="ctrl" id="play-btn" aria-label="재생"><svg class="icon solid"><use href="#i-play"></use></svg></button>
+      <span class="time" id="time">0:00 / 0:00</span>
+      <div class="track" id="track" role="slider" tabindex="0" aria-label="재생 위치" aria-valuemin="0"></div>
+      <select class="speed" id="speed" aria-label="재생 속도">
+        <option value="0.75">0.75배</option>
+        <option value="1" selected>1배</option>
+        <option value="1.25">1.25배</option>
+        <option value="1.5">1.5배</option>
+      </select>
+    </div>
+    <nav class="chapters" id="chapters" aria-label="장면 고르기"></nav>
+  </section>
+
+  <section class="script" aria-labelledby="script-title">
+    <h2 id="script-title">장면별 해설</h2>
+    <p>영상의 자막 문장과 같은 내용입니다. 영상을 틀지 않고 읽어도 됩니다.</p>
+    <ol id="script-list"></ol>
+  </section>
+
+  <footer>2026-11-16 기준 화면·기능입니다. 회의 화면의 «사용 설명서»(/help)에 자세한 사용법이 있고, 다른 PC 설치는 docs/deploy.md 를 봅니다.
+    그림 속 지점 이름·회의 대화는 예시입니다.</footer>
+</div>
+
+<script>
+(() => {
+"use strict";
+const FPS = 30;
+const NS = "http://www.w3.org/2000/svg";
+
+/* ---------- 프레임 계산 (Remotion 의 interpolate·spring 과 같은 생각: 모든 움직임은 프레임 번호의 함수) ---------- */
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const E = {
+  out: (t) => 1 - Math.pow(1 - t, 3),
+  inOut: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
+  lin: (t) => t,
+};
+function interp(f, [a, b], [c, d], e = E.out) {
+  if (b === a) return f < a ? c : d;
+  return c + (d - c) * e(clamp((f - a) / (b - a), 0, 1));
+}
+function spring(t) {
+  if (t <= 0) return 0;
+  const sec = t / FPS, w0 = Math.sqrt(170), z = 14 / (2 * w0), wd = w0 * Math.sqrt(1 - z * z);
+  return 1 - Math.exp(-z * w0 * sec) * (Math.cos(wd * sec) + (z * w0 / wd) * Math.sin(wd * sec));
+}
+function keys(f, list, e = E.inOut) {
+  if (f <= list[0][0]) return [list[0][1], list[0][2]];
+  for (let i = 1; i < list.length; i++) {
+    const [t1, x1, y1] = list[i];
+    if (f <= t1) {
+      const [t0, x0, y0] = list[i - 1];
+      const p = t1 === t0 ? 1 : e((f - t0) / (t1 - t0));
+      return [x0 + (x1 - x0) * p, y0 + (y1 - y0) * p];
+    }
+  }
+  const l = list[list.length - 1];
+  return [l[1], l[2]];
+}
+const qpt = (a, c, b, t) => { const u = 1 - t; return [u * u * a[0] + 2 * u * t * c[0] + t * t * b[0], u * u * a[1] + 2 * u * t * c[1] + t * t * b[1]]; };
+const lpt = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+
+/* ---------- SVG 도우미 ---------- */
+function s(tag, attrs = {}, kids = []) {
+  const n = document.createElementNS(NS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  for (const c of kids) if (c != null && c !== false) n.append(typeof c === "string" ? document.createTextNode(c) : c);
+  return n;
+}
+const txt = (x, y, str, cls = "t t-sm", anchor = "middle") => s("text", { x, y, class: cls, "text-anchor": anchor }, [str]);
+function at(n, x, y, sc = 1) { n.setAttribute("transform", `translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${Math.max(0, sc).toFixed(3)})`); }
+function op(n, v) { n.setAttribute("opacity", clamp(v, 0, 1).toFixed(3)); }
+function draw(p, v) { op(p, v > 0 ? 1 : 0); p.setAttribute("stroke-dashoffset", (1 - clamp(v, 0, 1)).toFixed(4)); }
+function tw(str, size) {
+  let w = 0;
+  for (const ch of str) { const c = ch.codePointAt(0); w += c >= 0x2e80 ? size : ch === " " ? size * 0.3 : size * 0.58; }
+  return w;
+}
+function pop(n, f, t0, x, y, base = 1) { const k = spring(f - t0); at(n, x, y, base * k); op(n, k * 3); }
+function fadeUp(n, f, t0, x, y, len = 14) { const p = interp(f, [t0, t0 + len], [0, 1]); at(n, x, y + (1 - p) * 14); op(n, p); }
+function typed(n, full, f, t0, t1) { n.textContent = full.slice(0, Math.round(interp(f, [t0, t1], [0, [...full].length], E.lin))); }
+
+/* ---------- 부품 ---------- */
+const DOT = { ok: "f-ok", warn: "f-warn", danger: "f-danger" };
+const chipW = (text, kind) => tw(text, 14) + 28 + (DOT[kind] ? 16 : 0);
+function chip(x, y, text, kind = "soft") {
+  const w = chipW(text, kind), dot = DOT[kind];
+  // 바깥 g 는 비워 두어 at()·pop() 이 움직이고, 안쪽 g 가 제자리를 갖는다.
+  return s("g", {}, [s("g", { transform: `translate(${x} ${y})` }, [
+    s("rect", { x: -w / 2, y: -14, width: w, height: 28, rx: 14, class: kind === "soft" ? "chip-soft" : "chip-flat" }),
+    dot && s("circle", { cx: -w / 2 + 18, cy: 0, r: 5, class: dot }),
+    txt(dot ? 8 : 0, 5, text, "t t-xs"),
+  ])]);
+}
+const wrap = (...kids) => s("g", {}, kids);
+function person() { return s("g", { class: "person" }, [s("circle", { cx: 0, cy: -14, r: 13 }), s("path", { d: "M-24,26 a24,22 0 0 1 48,0 z" })]); }
+function pc(label, lang) {
+  const screen = s("g");
+  const g = s("g", {}, [
+    s("rect", { x: -100, y: -80, width: 200, height: 130, rx: 10, class: "f-surface s-line" }),
+    s("rect", { x: -90, y: -70, width: 180, height: 110, rx: 5, class: "tile" }),
+    screen,
+    s("rect", { x: -14, y: 50, width: 28, height: 14, class: "f-strong" }),
+    s("rect", { x: -44, y: 64, width: 88, height: 8, rx: 4, class: "f-strong" }),
+    label && txt(0, 102, label, "t t-md"),
+    lang && chip(0, 130, lang),
+  ]);
+  return { g, screen };
+}
+function server(label) {
+  return s("g", {}, [
+    s("rect", { x: -48, y: -70, width: 96, height: 140, rx: 10, class: "f-surface s-line" }),
+    ...[-48, -24, 0].map((y) => s("rect", { x: -32, y, width: 64, height: 14, rx: 3, class: "f-strong" })),
+    s("circle", { cx: 26, cy: 48, r: 6, class: "f-ok" }),
+    label && txt(0, 102, label, "t t-md"),
+  ]);
+}
+function cloud(label) {
+  return s("g", {}, [
+    s("circle", { cx: -62, cy: 10, r: 40, class: "f-soft" }),
+    s("circle", { cx: -12, cy: -16, r: 54, class: "f-soft" }),
+    s("circle", { cx: 48, cy: 0, r: 44, class: "f-soft" }),
+    s("circle", { cx: 86, cy: 22, r: 28, class: "f-soft" }),
+    s("rect", { x: -100, y: 6, width: 214, height: 44, rx: 22, class: "f-soft" }),
+    txt(4, 18, label, "t t-sm t-b"),
+  ]);
+}
+function phone() {
+  return s("g", {}, [
+    s("rect", { x: -34, y: -64, width: 68, height: 128, rx: 12, class: "f-surface s-line" }),
+    s("rect", { x: -28, y: -52, width: 56, height: 100, rx: 4, class: "tile" }),
+    s("circle", { cx: 0, cy: 56, r: 3.5, class: "f-strong" }),
+  ]);
+}
+function btn(label, w, kind = "accent") {
+  const r = s("rect", { x: -w / 2, y: -20, width: w, height: 40, rx: 8, class: `b-${kind}` });
+  const t = txt(0, 6, label, `t t-sm bt-${kind}`);
+  const g = s("g", {}, [r, t]);
+  g.kind = (k) => { r.setAttribute("class", `b-${k}`); t.setAttribute("class", `t t-sm bt-${k}`); };
+  g.label = (l) => { if (t.textContent !== l) t.textContent = l; };
+  return g;
+}
+function bubble(text) {
+  const w = tw(text, 17) + 34;
+  return s("g", {}, [
+    s("rect", { x: -w / 2, y: -22, width: w, height: 42, rx: 12, class: "f-surface s-line" }),
+    s("path", { d: "M-8,19 L0,30 L8,19 Z", class: "f-surface" }),
+    txt(0, 6, text, "t t-sm"),
+  ]);
+}
+function lock() {
+  return s("g", {}, [s("path", { d: "M-6,-2 v-6 a6,6 0 0 1 12,0 v6", class: "lock-arc" }), s("rect", { x: -10, y: -3, width: 20, height: 16, rx: 3, class: "f-ok" })]);
+}
+function win(w, h, title) {
+  return s("g", {}, [
+    s("rect", { x: -w / 2, y: -h / 2, width: w, height: h, rx: 12, class: "f-surface s-line" }),
+    s("rect", { x: -w / 2 + 1, y: -h / 2 + 1, width: w - 2, height: 36, rx: 11, class: "f-strong" }),
+    ...[0, 1, 2].map((i) => s("circle", { cx: -w / 2 + 22 + i * 18, cy: -h / 2 + 19, r: 5, class: "f-bg" })),
+    txt(-w / 2 + 84, -h / 2 + 25, title, "t t-xs t-dim", "start"),
+  ]);
+}
+function fileIcon(ext, name) {
+  return s("g", {}, [
+    s("path", { d: "M-26,-34 h36 l16,16 v52 h-52 z", class: "f-strong s-line" }),
+    s("path", { d: "M10,-34 v16 h16", class: "s-line nofill" }),
+    txt(0, 10, ext, "t t-xs t-b"),
+    name && txt(0, 60, name, "t t-sm"),
+  ]);
+}
+function docLines(w, h) {
+  const g = s("g", {}, [s("rect", { x: -w / 2, y: -h / 2, width: w, height: h, rx: 6, class: "f-surface s-line" })]);
+  g.append(s("rect", { x: -w / 2 + w * 0.08, y: -h / 2 + h * 0.1, width: w * 0.5, height: h * 0.09, rx: 3, class: "f-accent" }));
+  for (let i = 0; i < 4; i++) g.append(s("rect", { x: -w / 2 + w * 0.08, y: -h / 2 + h * (0.28 + i * 0.12), width: w * (i % 2 ? 0.5 : 0.62), height: h * 0.05, rx: 2, class: "f-strong" }));
+  [0.5, 0.75, 0.35, 0.9].forEach((v, i) => g.append(s("rect", { x: w * 0.12 + i * w * 0.08, y: h * 0.38 - h * 0.5 * v, width: w * 0.05, height: h * 0.5 * v, class: i === 3 ? "f-ok" : "f-accent" })));
+  return g;
+}
+function cursorG() { return s("path", { d: "M0,0 L0,27 L7,21 L12,32 L17,30 L12,19 L21,19 Z", class: "cursor" }); }
+function useCursor(g, list, clicks) {
+  const rip = clicks.map(() => { const c = s("circle", { r: 0, class: "ripple" }); g.append(c); return c; });
+  const cur = cursorG(); g.append(cur);
+  return (f) => {
+    const [x, y] = keys(f, list);
+    at(cur, x, y);
+    op(cur, f < list[0][0] ? 0 : interp(f, [list[0][0], list[0][0] + 6], [0, 1]) * (f > list[list.length - 1][0] + 24 ? interp(f, [list[list.length - 1][0] + 24, list[list.length - 1][0] + 32], [1, 0]) : 1));
+    clicks.forEach((t0, i) => {
+      const [cx, cy] = keys(t0, list);
+      const p = (f - t0) / 14;
+      if (p < 0 || p > 1) { op(rip[i], 0); return; }
+      rip[i].setAttribute("cx", cx); rip[i].setAttribute("cy", cy);
+      rip[i].setAttribute("r", (4 + 24 * E.out(p)).toFixed(1));
+      op(rip[i], 0.9 * (1 - p));
+    });
+  };
+}
+function press(n, f, t0, x, y, base = 1) { at(n, x, y, base * (1 - 0.07 * Math.sin(Math.PI * clamp((f - t0) / 8, 0, 1)))); }
+function waves(g, x, y) {
+  const arcs = [18, 32, 46].map((r) => { const a = s("path", { d: `M ${r * 0.7} ${-r * 0.7} A ${r} ${r} 0 0 1 ${r * 0.7} ${r * 0.7}`, class: "wave" }); return a; });
+  const w = s("g", {}, arcs); at(w, x, y); g.append(w);
+  return (f, on) => arcs.forEach((a, i) => op(a, on ? 0.25 + 0.75 * (Math.sin(f / 4 - i * 1.3) + 1) / 2 : 0));
+}
+
+/* ---------- 장면 ---------- */
+const SCENES = [];
+
+/* 1. 한눈에 보기 */
+SCENES.push({
+  title: "한눈에 보기", dur: 300,
+  subs: [[0, "VisionMeeting 은 최대 4곳의 PC 를 잇는 화상회의입니다."],
+         [100, "누가 말하든 자막이 뜨고, 지점마다 자기 언어로 읽습니다."],
+         [205, "서버 PC 한 대로 돌아가고, 드는 비용은 0원입니다."]],
+  note: "언어는 한국어·영어·베트남어·중국어·일본어 중 회의당 3개까지. 중국어·일본어는 아직 실제 검증 전입니다.",
+  build(g) {
+    const title = wrap(txt(0, 0, "VisionMeeting", "t t-xl"), txt(0, 52, "말하면 자막이 되고, 자막은 각자의 언어로 읽힙니다", "t t-md t-dim"));
+    at(title, 640, 160); g.append(title);
+    const sites = [["서울 본사", "한국어", "안녕하세요"], ["부산 공장", "한국어", "안녕하세요"], ["하노이 법인", "베트남어", "Xin chào"], ["댈러스 법인", "영어", "Hello"]];
+    const xs = [190, 490, 790, 1090];
+    const links = [0, 1, 2].map((i) => { const m = (xs[i] + xs[i + 1]) / 2; const p = s("path", { d: `M ${xs[i] + 88} 428 Q ${m} 470 ${xs[i + 1] - 88} 428`, pathLength: 1, class: "wire" }); g.append(p); return p; });
+    const pcs = sites.map(([n, l]) => { const p = pc(n, l); p.screen.append(wrap(person())); at(p.screen.lastChild, 0, -12); g.append(p.g); return p.g; });
+    const bubbles = sites.map(([, , hi]) => { const b = bubble(hi); g.append(b); return b; });
+    const facts = wrap(chip(-280, 0, "최대 4곳 접속"), chip(0, 0, "언어 5개 · 회의당 3개"), chip(280, 0, "비용 0원", "ok"));
+    g.append(facts);
+    return (f) => {
+      pcs.forEach((n, i) => pop(n, f, 22 + i * 9, xs[i], 440, 0.85));
+      links.forEach((p, i) => draw(p, interp(f, [78 + i * 10, 108 + i * 10], [0, 1])));
+      bubbles.forEach((b, i) => pop(b, f, 128 + i * 12, xs[i], 318));
+      fadeUp(facts, f, 210, 640, 598);
+    };
+  },
+});
+
+/* 2. 서버 켜기 */
+SCENES.push({
+  title: "서버 켜기", dur: 330,
+  subs: [[0, "서버 PC 에서 run.bat 을 두 번 누르면 서버가 켜집니다."],
+         [90, "검은 창에 접속 주소가 나오고, 브라우저가 저절로 열립니다."],
+         [235, "사내 PC 는 처음 한 번만 서버의 인증서(rootCA.pem)를 설치합니다."]],
+  note: "회의 화면만 다시 열 때는 program.bat, 서버를 끌 때는 stop.bat 을 씁니다. 인증서 파일은 rootCA.pem 하나만 주고, 이름에 key 가 들어간 파일은 주지 않습니다.",
+  build(g) {
+    g.append(s("rect", { x: 60, y: 92, width: 480, height: 470, rx: 14, class: "f-surface s-line" }));
+    g.append(txt(84, 126, "서버 PC 바탕화면", "t t-xs t-dim", "start"));
+    const hi = s("rect", { x: 128, y: 168, width: 104, height: 130, rx: 10, class: "f-soft" }); g.append(hi);
+    const file = fileIcon("BAT", "run.bat"); at(file, 180, 222); g.append(file);
+    const lan = pc("사내 PC", null); const lk = lock(); lan.screen.append(lk); at(lk, 0, -14, 1.6); g.append(lan.g);
+    const cert = wrap(s("rect", { x: -54, y: -16, width: 108, height: 32, rx: 6, class: "f-soft s-accent" }), txt(0, 6, "rootCA.pem", "t t-xs t-b mono"));
+    g.append(cert);
+    const term = win(600, 232, "VisionMeeting server"); g.append(term);
+    const lines = ["현재 네트워크: Wi-Fi / IP: 192.168.0.10", "현재 IP와 인증서가 일치합니다.", "내 PC 접속: https://localhost:8443", "참가자 PC 접속: https://192.168.0.10:8443"]
+      .map((_, i) => { const t = txt(-276, -50 + i * 38, "", `t t-sm mono${i >= 2 ? " t-ok" : ""}`, "start"); term.append(t); return t; });
+    const texts = ["현재 네트워크: Wi-Fi / IP: 192.168.0.10", "현재 IP와 인증서가 일치합니다.", "내 PC 접속: https://localhost:8443", "참가자 PC 접속: https://192.168.0.10:8443"];
+    const br = win(600, 190, "브라우저");
+    const addr = wrap(s("rect", { x: -280, y: -16, width: 560, height: 32, rx: 16, class: "f-bg" }), wrap(lock()), txt(-236, 6, "https://localhost:8443", "t t-xs mono", "start"));
+    at(addr.children[1], -258, 2, 0.7); at(addr, 0, -44); br.append(addr);
+    br.append(txt(0, 22, "VisionMeeting", "t t-lg"));
+    const tabs = wrap(chip(-62, 0, "회의 개설"), chip(62, 0, "회의 참여")); at(tabs, 0, 62); br.append(tabs);
+    g.append(br);
+    const cursor = useCursor(g, [[8, 470, 470], [46, 186, 226]], [52, 61]);
+    return (f) => {
+      op(hi, interp(f, [52, 58], [0, 1]) * interp(f, [90, 110], [1, 0]));
+      at(file, 180, 222); op(file, 1);
+      pop(term, f, 68, 910, 232);
+      lines.forEach((t, i) => typed(t, texts[i], f, 86 + i * 30, 108 + i * 30));
+      pop(br, f, 212, 910, 470);
+      pop(lan.g, f, 240, 400, 440, 0.6);
+      const [cx, cy] = qpt([180, 340], [250, 300], [400, 405], interp(f, [262, 298], [0, 1], E.inOut));
+      at(cert, cx, cy, f > 300 ? interp(f, [300, 310], [1, 0.4]) : 1);
+      op(cert, interp(f, [255, 262], [0, 1]) * interp(f, [302, 312], [1, 0]));
+      op(lk, interp(f, [300, 310], [0, 1]));
+      cursor(f);
+    };
+  },
+});
+
+/* 3. 회의 만들기·참여 */
+SCENES.push({
+  title: "회의 만들기·참여", dur: 330,
+  subs: [[0, "Host 는 개설 코드를 넣고 «회의 만들기»를 누릅니다."],
+         [100, "회의 ID·비밀번호·초대 링크가 나오면, 초대 링크를 참석자에게 보냅니다."],
+         [178, "참석자는 지점 이름과 언어를 고르고 동의에 체크합니다. 그래야 «입장»이 켜집니다."]],
+  note: "초대 링크로 들어오면 회의 ID·비밀번호가 저절로 채워집니다. 개설 코드가 비어 있으면 사내망에서만 회의를 만들 수 있습니다.",
+  build(g) {
+    const card = (x, active) => {
+      g.append(s("rect", { x, y: 92, width: 520, height: 470, rx: 16, class: "f-surface s-line" }));
+      g.append(txt(x + 130, 136, "회의 개설", `t t-sm ${active === 0 ? "t-b" : "t-dim"}`));
+      g.append(txt(x + 270, 136, "회의 참여", `t t-sm ${active === 1 ? "t-b" : "t-dim"}`));
+      g.append(s("rect", { x: x + (active === 0 ? 80 : 220), y: 146, width: 100, height: 3, rx: 1.5, class: "f-accent" }));
+    };
+    const field = (x, y, label) => {
+      g.append(txt(x, y, label, "t t-xs t-dim", "start"));
+      g.append(s("rect", { x, y: y + 10, width: 460, height: 38, rx: 8, class: "f-bg s-line" }));
+      const v = txt(x + 14, y + 35, "", "t t-sm", "start"); g.append(v); return v;
+    };
+    card(70, 0);
+    const code = field(100, 196, "개설 코드");
+    const make = btn("회의 만들기", 200); g.append(make);
+    const result = wrap(
+      s("rect", { x: 0, y: 0, width: 460, height: 132, rx: 10, class: "f-bg" }),
+      txt(20, 36, "회의 ID", "t t-xs t-dim", "start"), txt(440, 36, "●●●● ●●●●", "t t-sm t-b", "end"),
+      txt(20, 72, "비밀번호", "t t-xs t-dim", "start"), txt(440, 72, "●●●●●●", "t t-sm t-b", "end"),
+      txt(20, 108, "초대 링크", "t t-xs t-dim", "start"), txt(440, 108, "https://…/#●●●●", "t t-sm mono", "end"));
+    g.append(result);
+    const copy = btn("초대 링크 복사", 180, "ghost"); g.append(copy);
+
+    const joinG = s("g"); g.append(joinG);
+    const gSave = g; g = joinG;
+    card(690, 1);
+    const jid = field(720, 166, "회의 ID");
+    const jpw = field(720, 228, "비밀번호");
+    const jname = field(720, 290, "지점 이름");
+    const jlang = field(720, 352, "지점 언어");
+    const box = s("rect", { x: 720, y: 420, width: 22, height: 22, rx: 5, class: "f-bg s-line" }); g.append(box);
+    const tick = s("path", { d: "M725,431 l5,5 l9,-10", class: "check" }); g.append(tick);
+    g.append(txt(754, 437, "전송 안내를 읽었고 동의합니다", "t t-xs", "start"));
+    const enter = btn("입장", 200, "off"); g.append(enter);
+    const joined = chip(0, 0, "회의에 들어갔습니다", "ok"); g.append(joined);
+    g = gSave;
+    const link = wrap(s("rect", { x: -40, y: -16, width: 80, height: 32, rx: 16, class: "f-accent" }), txt(0, 6, "링크", "t t-xs bt-accent")); g.append(link);
+    const cursor = useCursor(g,
+      [[5, 520, 590], [20, 300, 224], [56, 300, 224], [68, 330, 292], [86, 330, 292], [100, 330, 522], [118, 330, 522],
+       [175, 1000, 314], [212, 1000, 314], [226, 1000, 376], [236, 1000, 376], [246, 731, 431], [262, 731, 431], [280, 950, 503]],
+      [20, 70, 104, 177, 228, 246, 283]);
+    return (f) => {
+      typed(code, "●●●●●●", f, 22, 50);
+      press(make, f, 70, 330, 292);
+      fadeUp(result, f, 82, 100, 330);
+      fadeUp(copy, f, 90, 330, 522);
+      if (f >= 102) press(copy, f, 104, 330, 522);
+      op(joinG, interp(f, [110, 124], [0, 1]));
+      const [lx, ly] = qpt([330, 500], [640, 60], [1000, 186], interp(f, [112, 160], [0, 1], E.inOut));
+      at(link, lx, ly); op(link, interp(f, [108, 114], [0, 1]) * interp(f, [158, 166], [1, 0]));
+      jid.textContent = f >= 162 ? "자동으로 채워짐 ✓" : ""; jid.setAttribute("class", "t t-sm t-ok");
+      jpw.textContent = f >= 166 ? "자동으로 채워짐 ✓" : ""; jpw.setAttribute("class", "t t-sm t-ok");
+      typed(jname, "하노이 법인", f, 180, 208);
+      jlang.textContent = f >= 230 ? "베트남어 ▾" : "언어 고르기 ▾";
+      jlang.setAttribute("class", f >= 230 ? "t t-sm" : "t t-sm t-dim");
+      const on = f >= 246;
+      box.setAttribute("class", on ? "f-accent" : "f-bg s-line"); op(tick, on ? 1 : 0);
+      enter.kind(on ? "accent" : "off");
+      press(enter, f, 283, 950, 503);
+      pop(joined, f, 292, 950, 548);
+      cursor(f);
+    };
+  },
+});
+
+/* 4. 영상 연결 */
+SCENES.push({
+  title: "영상 연결", dur: 300,
+  subs: [[0, "서버는 참석 PC 들을 서로 소개해 주는 일만 합니다."],
+         [105, "영상과 목소리는 PC 끼리 직접, 암호화해서 주고받습니다."],
+         [215, "그래서 서버에는 영상도 음성도 남지 않습니다."]],
+  note: "연결이 잠깐 끊기면 다시 연결을 시도합니다. 연결이 안 되는 상대는 타일에 «연결 중…»으로 보입니다.",
+  build(g) {
+    const S = [640, 150];
+    const P = [[250, 290], [1030, 290], [420, 472], [860, 472]];
+    const A = P.map(([x, y]) => [x, y - 10]);
+    const sigs = A.map((a) => { const p = s("path", { d: `M ${a[0]} ${a[1]} L ${S[0]} ${S[1]}`, class: "sig" }); g.append(p); return p; });
+    const env = A.map(() => { const c = s("circle", { r: 6, class: "pkt dim" }); g.append(c); return c; });
+    const pairs = [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]];
+    const mesh = pairs.map(([i, j]) => { const p = s("path", { d: `M ${A[i][0]} ${A[i][1]} L ${A[j][0]} ${A[j][1]}`, pathLength: 1, class: "wire" }); g.append(p); return p; });
+    const pk = pairs.flatMap(() => [0, 1].map(() => { const c = s("circle", { r: 6, class: "pkt" }); g.append(c); return c; }));
+    const srv = server("서버 · 소개만"); g.append(srv);
+    const names = ["서울 본사", "댈러스 법인", "부산 공장", "하노이 법인"];
+    const pcs = P.map((_, i) => { const p = pc(names[i]); p.screen.append(wrap(person())); at(p.screen.lastChild, 0, -12); g.append(p.g); return p.g; });
+    const locks = [[0, 1], [2, 3], [0, 2], [1, 3]].map(([i, j]) => { const l = lock(); g.append(l); return { l, m: lpt(A[i], A[j], 0.5) }; });
+    const c1 = chip(640, 262, "서로의 주소를 알려 줍니다"); g.append(c1);
+    const c2 = chip(640, 590, "영상·음성 = PC 끼리 직접"); g.append(c2);
+    const c3 = chip(640, 52, "서버에 저장하지 않음", "ok"); g.append(c3);
+    return (f) => {
+      op(srv, interp(f, [110, 140], [1, 0.4])); at(srv, S[0], S[1], 0.7);
+      pcs.forEach((n, i) => pop(n, f, 6 + i * 6, P[i][0], P[i][1], 0.7));
+      sigs.forEach((p, i) => { op(p, interp(f, [14 + i * 5, 28 + i * 5], [0, 1]) * interp(f, [110, 130], [1, 0])); p.setAttribute("stroke-dashoffset", (-f * 0.8).toFixed(1)); });
+      env.forEach((c, i) => {
+        const t = (f - 30 - i * 6) / 34;
+        if (t < 0 || t > 2 || f > 108) { op(c, 0); return; }
+        const u = t <= 1 ? t : 2 - t; const [x, y] = lpt(A[i], S, u);
+        c.setAttribute("cx", x.toFixed(1)); c.setAttribute("cy", y.toFixed(1)); op(c, 1);
+      });
+      fadeUp(c1, f, 40, 0, 0); op(c1, interp(f, [40, 54], [0, 1]) * interp(f, [104, 116], [1, 0]));
+      mesh.forEach((p, k) => draw(p, interp(f, [112 + k * 8, 140 + k * 8], [0, 1])));
+      pairs.forEach(([i, j], k) => [0, 1].forEach((d) => {
+        const c = pk[k * 2 + d];
+        if (f < 180) { op(c, 0); return; }
+        let t = ((f - 180) / 50 + d * 0.5) % 1; if ((k + d) % 2) t = 1 - t;
+        const [x, y] = lpt(A[i], A[j], t); c.setAttribute("cx", x.toFixed(1)); c.setAttribute("cy", y.toFixed(1));
+        op(c, interp(f, [180, 190], [0, 1]));
+      }));
+      locks.forEach(({ l, m }, k) => pop(l, f, 205 + k * 6, m[0], m[1], 1.2));
+      fadeUp(c2, f, 150, 0, 0); fadeUp(c3, f, 222, 0, 0);
+    };
+  },
+});
+
+/* 5. 해외 참석·중계 */
+SCENES.push({
+  title: "해외 참석·중계", dur: 390,
+  subs: [[0, "해외 참석자는 Host 가 만든 «외부 참석 링크»로 들어옵니다."],
+         [125, "회사 방화벽 때문에 PC 끼리 바로 연결되지 않을 때가 있습니다."],
+         [200, "그때는 Cloudflare 중계 서버가 영상을 대신 전달합니다. 매달 1,000 GB 까지 무료입니다."],
+         [290, "최근 31일 900 GB 를 넘으면 음성만, 950 GB 에서는 중계를 멈춰 요금이 나오지 않습니다."]],
+  note: "Host 는 회의 화면에서 중계를 Metered 로 바꿀 수 있습니다. 950 GB 에서 멈춰도 Metered 로 저절로 바꾸지는 않고 Host 에게 알려 줍니다. «외부 공개 끄기»를 누르거나 서버를 끄면 외부 링크는 닫힙니다.",
+  build(g) {
+    g.append(s("rect", { x: 50, y: 100, width: 420, height: 445, rx: 16, class: "f-surface s-line" }));
+    g.append(txt(72, 132, "회사 안 (사내망)", "t t-xs t-dim", "start"));
+    g.append(s("rect", { x: 860, y: 100, width: 370, height: 445, rx: 16, class: "f-surface s-line" }));
+    g.append(txt(882, 132, "회사 밖 (인터넷)", "t t-xs t-dim", "start"));
+    const tunnel = s("path", { d: "M 205 296 Q 640 10 1050 396", pathLength: 1, class: "wire" }); g.append(tunnel);
+    const tLabel = chip(634, 140, "Cloudflare 터널 · 임시 주소"); g.append(tLabel);
+    const page = s("circle", { r: 8, class: "pkt" }); g.append(page);
+    const srv = server("서버 PC"); g.append(srv);
+    const seoul = pc("서울 본사"); seoul.screen.append(wrap(person())); at(seoul.screen.lastChild, 0, -12); g.append(seoul.g);
+    const hanoi = pc("하노이 법인"); const hp = wrap(person()); hanoi.screen.append(hp); at(hp, 0, -12);
+    const hTitle = txt(0, -42, "VisionMeeting", "t t-xs t-b"); hanoi.screen.append(hTitle); g.append(hanoi.g);
+    const tBtn = btn("외부 참석 링크", 170, "ghost"); g.append(tBtn);
+    const direct = s("path", { d: "M 425 440 L 616 440", pathLength: 1, class: "wire dim" }); g.append(direct);
+    const wall = wrap(s("rect", { x: -22, y: -66, width: 44, height: 132, rx: 4, class: "f-strong s-line" }),
+      ...[-44, -22, 0, 22, 44].map((y) => s("line", { x1: -22, y1: y, x2: 22, y2: y, class: "s-line" })),
+      txt(0, 92, "방화벽", "t t-xs t-dim"));
+    g.append(wall);
+    const xm = wrap(s("line", { x1: -16, y1: -16, x2: 16, y2: 16, class: "xmark" }), s("line", { x1: 16, y1: -16, x2: -16, y2: 16, class: "xmark" })); g.append(xm);
+    const cl = cloud("Cloudflare 중계"); g.append(cl);
+    const rA = [[425, 425], [566, 318]], rB = [[714, 318], [996, 425]];
+    const la = s("path", { d: `M ${rA[0]} L ${rA[1]}`, pathLength: 1, class: "wire ok" });
+    const lb = s("path", { d: `M ${rB[0]} L ${rB[1]}`, pathLength: 1, class: "wire ok" });
+    g.insertBefore(lb, cl); g.insertBefore(la, cl);
+    const pkts = [0, 1, 2].map(() => { const c = s("circle", { r: 6, class: "pkt ok" }); g.append(c); return c; });
+    const gauge = s("g"); g.append(gauge);
+    gauge.append(txt(346, 601, "최근 31일", "t t-xs t-dim", "end"));
+    gauge.append(s("rect", { x: 360, y: 588, width: 560, height: 16, rx: 8, class: "f-strong" }));
+    const fill = s("rect", { x: 360, y: 588, width: 0, height: 16, rx: 8, class: "f-ok" }); gauge.append(fill);
+    gauge.append(s("rect", { x: 863, y: 578, width: 2, height: 36, class: "f-warn" }));
+    gauge.append(s("rect", { x: 891, y: 578, width: 2, height: 36, class: "f-danger" }));
+    gauge.append(txt(858, 572, "900 GB 음성만", "t t-xs t-warn", "end"));
+    gauge.append(txt(898, 572, "950 GB 중계 멈춤", "t t-xs t-danger", "start"));
+    const read = txt(936, 601, "", "t t-xs t-b", "start"); gauge.append(read);
+    const cursor = useCursor(g, [[4, 430, 300], [26, 262, 163]], [30]);
+    return (f) => {
+      at(srv, 170, 320, 0.65); at(seoul.g, 360, 450, 0.6); at(hanoi.g, 1050, 450, 0.6);
+      pop(tBtn, f, 6, 262, 160); if (f > 28) press(tBtn, f, 30, 262, 160);
+      draw(tunnel, interp(f, [38, 88], [0, 1], E.inOut)); fadeUp(tLabel, f, 60, 0, 0);
+      const t = interp(f, [90, 124], [0, 1], E.inOut); const [px, py] = qpt([205, 296], [640, 10], [1050, 396], t);
+      page.setAttribute("cx", px.toFixed(1)); page.setAttribute("cy", py.toFixed(1)); op(page, f >= 90 && f <= 126 ? 1 : 0);
+      op(hTitle, interp(f, [124, 132], [0, 1]));
+      pop(wall, f, 128, 640, 446);
+      draw(direct, interp(f, [140, 166], [0, 1])); op(direct, f < 140 ? 0 : interp(f, [186, 200], [1, 0.25]));
+      pop(xm, f, 168, 600, 440); op(xm, spring(f - 168) * 3 * interp(f, [190, 204], [1, 0.4]));
+      pop(cl, f, 200, 640, 300);
+      draw(la, interp(f, [212, 236], [0, 1])); draw(lb, interp(f, [224, 248], [0, 1]));
+      pkts.forEach((c, k) => {
+        if (f < 250) { op(c, 0); return; }
+        const u = ((f - 250) / 54 + k / 3) % 1;
+        let p, vis = 1;
+        if (u < 0.45) p = lpt(rA[0], rA[1], u / 0.45);
+        else if (u < 0.55) { p = [640, 310]; vis = 0; }
+        else p = lpt(rB[0], rB[1], (u - 0.55) / 0.45);
+        c.setAttribute("cx", p[0].toFixed(1)); c.setAttribute("cy", p[1].toFixed(1)); op(c, vis);
+      });
+      op(gauge, interp(f, [284, 298], [0, 1]));
+      const v = interp(f, [300, 372], [0, 962], E.inOut);
+      fill.setAttribute("width", (v * 0.56).toFixed(1));
+      const lvl = v >= 950 ? ["f-danger", "t t-xs t-b t-danger", "중계 멈춤"] : v >= 900 ? ["f-warn", "t t-xs t-b t-warn", "음성만"] : ["f-ok", "t t-xs t-b t-ok", "정상"];
+      fill.setAttribute("class", lvl[0]); read.setAttribute("class", lvl[1]);
+      read.textContent = `예: ${Math.round(v).toLocaleString("en-US")} / 1,000 GB · ${lvl[2]}`;
+      cursor(f);
+    };
+  },
+});
+
+/* 6. 자동 자막·번역 */
+SCENES.push({
+  title: "자동 자막·번역", dur: 330,
+  subs: [[0, "말하면, 그 PC 의 브라우저 음성 인식이 목소리를 글자로 바꿉니다."],
+         [115, "서버를 거쳐 다른 지점으로 가는 것은 글자 자막뿐입니다."],
+         [188, "받는 PC 가 그 글자를 자기 언어로 번역해서 보여 줍니다."],
+         [265, "여러 곳이 동시에 말해도 됩니다. 누를 버튼도 없습니다."]],
+  note: "Chrome 의 음성 인식은 Google 서버를 거칩니다(입장 전 동의). 번역은 받는 PC 안에서 합니다. 이 브라우저에서 인식·번역이 안 되면 화면 위에 «음성 인식 불가»·«번역 불가»와 이유를 보입니다.",
+  build(g) {
+    const sp = pc("서울 본사", "한국어"); sp.screen.append(wrap(person())); at(sp.screen.lastChild, 0, -12); g.append(sp.g); at(sp.g, 190, 280, 0.85);
+    const wSp = waves(g, 290, 262);
+    const step1 = chip(190, 428, "① 브라우저가 글자로"); g.append(step1);
+    const bub = s("rect", { x: 40, y: 452, width: 360, height: 58, rx: 12, class: "interim" }); g.append(bub);
+    const btxt = txt(58, 488, "", "t t-sm t-dim", "start"); g.append(btxt);
+    const done = chip(0, 0, "확정", "ok"); g.append(done);
+    const srv = server("서버"); g.append(srv); at(srv, 560, 300, 0.45);
+    const step2 = chip(560, 384, "② 글자만 전달"); g.append(step2);
+    const recv = [["댈러스 법인", "영어", 200, "Let's fix next week's shipping plan."], ["하노이 법인", "베트남어", 440, "Hãy chốt kế hoạch giao hàng tuần tới."]];
+    const rPcs = recv.map(([n, l, y]) => { const p = pc(n, l); p.screen.append(wrap(person())); at(p.screen.lastChild, 0, -12); g.append(p.g); at(p.g, 730, y, 0.7); return p.g; });
+    const wDa = waves(g, 818, 186);
+    const cards = recv.map(([, , y, tr]) => {
+      const c = wrap(s("rect", { x: 0, y: -48, width: 410, height: 100, rx: 10, class: "final" }),
+        txt(16, -22, "서울 본사 · 14:02", "t t-xs t-dim", "start"), txt(16, 8, tr, "t t-sm t-b", "start"), txt(16, 34, "다음 주 출하 일정을 확정합시다", "t t-xs t-dim", "start"));
+      g.append(c); return { c, y };
+    });
+    const step3 = [chip(1045, 132, "③ 이 PC 에서 번역"), chip(1045, 372, "③ 이 PC 에서 번역")]; step3.forEach((c) => g.append(c));
+    const flyA = chip(0, 0, "글자 자막"), flyB = chip(0, 0, "글자 자막"), flyC = chip(0, 0, "글자 자막"); [flyA, flyB, flyC].forEach((c) => g.append(c));
+    const both = chip(640, 596, "동시에 말해도 됩니다", "ok"); g.append(both);
+    return (f) => {
+      wSp(f, (f > 14 && f < 104) || f > 268); wDa(f, f > 272);
+      fadeUp(step1, f, 24, 0, 0);
+      typed(btxt, "다음 주 출하 일정을 확정합시다", f, 26, 98);
+      const fin = f >= 104;
+      bub.setAttribute("class", fin ? "final" : "interim"); btxt.setAttribute("class", fin ? "t t-sm t-b" : "t t-sm t-dim");
+      op(bub, interp(f, [20, 26], [0, 1])); op(btxt, interp(f, [20, 26], [0, 1]));
+      pop(done, f, 104, 352, 452);
+      op(srv, interp(f, [112, 124], [0, 1])); fadeUp(step2, f, 130, 0, 0);
+      const [ax, ay] = lpt([300, 480], [560, 300], interp(f, [120, 146], [0, 1], E.inOut));
+      at(flyA, ax, ay); op(flyA, f >= 118 && f <= 148 ? 1 : 0);
+      [[flyB, 200], [flyC, 440]].forEach(([c, y]) => {
+        const [x, yy] = qpt([560, 300], [700, y < 300 ? 220 : 400], [840, y], interp(f, [150, 182], [0, 1], E.inOut));
+        at(c, x, yy); op(c, f >= 148 && f <= 184 ? 1 : 0);
+      });
+      cards.forEach(({ c, y }, i) => fadeUp(c, f, 188 + i * 10, 830, y));
+      step3.forEach((c, i) => fadeUp(c, f, 192 + i * 10, 0, 0));
+      fadeUp(both, f, 270, 0, 0);
+    };
+  },
+});
+
+/* 7. 회의 화면 */
+SCENES.push({
+  title: "회의 화면", dur: 330,
+  subs: [[0, "회의 화면은 왼쪽이 영상, 오른쪽이 자막입니다. 처음에는 70 : 30 입니다."],
+         [125, "가운데 막대를 끌면 폭이 바뀝니다. 두 번 누르면 70 : 30 으로 돌아갑니다."],
+         [232, "«마이크 꺼짐»이면 내 목소리도, 내 자막도 나가지 않습니다."],
+         [288, "«스피커 꺼짐»은 소리만 끕니다. 자막은 계속 올라옵니다."]],
+  note: "«번역 음성»을 켜면 다른 지점의 말을 이 PC 의 브라우저 음성으로 읽어 줍니다(기본 꺼짐). 막대 비율은 PC 마다 기억합니다.",
+  build(g) {
+    const W = { x: 70, y: 78, w: 1140, h: 514 };
+    g.append(s("rect", { x: W.x, y: W.y, width: W.w, height: W.h, rx: 14, class: "f-surface s-line" }));
+    g.append(s("line", { x1: W.x, y1: 130, x2: W.x + W.w, y2: 130, class: "s-line" }));
+    g.append(s("line", { x1: W.x, y1: 530, x2: W.x + W.w, y2: 530, class: "s-line" }));
+    g.append(txt(94, 110, "회의", "t t-xs t-dim", "start"));
+    g.append(txt(134, 110, "●●●● ●●●●", "t t-sm t-b", "start"));
+    let bx = W.x + W.w - 18;
+    for (const [label, kind] of [["접속 4곳", "plain"], ["외부 중계 준비됨 · Cloudflare", "ok"], ["연결됨", "ok"], ["자막 준비됨", "ok"]]) {
+      const w = chipW(label, kind); bx -= w / 2; g.append(chip(bx, 104, label, kind)); bx -= w / 2 + 10;
+    }
+    const names = ["서울 본사", "부산 공장", "하노이 법인", "댈러스 법인"];
+    const tiles = names.map((n) => { const r = s("rect", { rx: 8, class: "tile" }); const p = person(); const t = txt(0, 0, n, "t t-xs", "start"); g.append(r); g.append(p); g.append(t); return { r, p, t }; });
+    const panel = s("rect", { y: 138, height: 384, rx: 10, class: "f-bg" }); g.append(panel);
+    const cardsData = [["하노이 법인 · 14:02", "재고는 수요일까지 확인하겠습니다.", "Tôi sẽ kiểm tra tồn kho trước thứ Tư."],
+                       ["댈러스 법인 · 14:03", "좋습니다, 금요일에 다시 봅시다.", "Sounds good, let's meet again Friday."],
+                       ["서울 본사 · 14:03", "다음 주 출하 일정을 확정합시다.", ""],
+                       ["하노이 법인 · 14:04", "운송 견적은 내일 보내겠습니다.", "Tôi sẽ gửi báo giá vận chuyển ngày mai."]];
+    const cards = cardsData.map(([a, b, c]) => {
+      const r = s("rect", { y: 0, height: 86, rx: 8, class: "f-surface s-line" });
+      const g1 = wrap(r, txt(14, 22, a, "t t-xs t-dim", "start"), txt(14, 50, b, "t t-sm t-b", "start"), c && txt(14, 74, c, "t t-xs t-dim", "start"));
+      g.append(g1); return { g: g1, r };
+    });
+    const spl = s("rect", { y: 146, width: 3, height: 368, rx: 1.5, class: "split" }); g.append(spl);
+    const ratio = chip(0, 0, "70 : 30"); g.append(ratio);
+    const status = txt(96, 566, "", "t t-xs t-dim", "start"); g.append(status);
+    const mic = btn("마이크 켜짐", 136); const spk = btn("스피커 켜짐", 136); const tts = btn("번역 음성: 꺼짐", 160, "ghost");
+    [mic, spk, tts].forEach((b) => g.append(b));
+    const cursor = useCursor(g, [[124, 640, 650], [146, 863, 330], [150, 863, 330], [186, 760, 330], [232, 760, 330], [256, 620, 562], [286, 620, 562], [298, 765, 562]], [148, 260, 300]);
+    return (f) => {
+      const split = interp(f, [150, 186], [863, 760], E.inOut);
+      const x0 = 84, x1 = split - 8, gap = 10;
+      const tw2 = (x1 - x0 - gap) / 2, th = Math.min(184, tw2 * 9 / 16), top = 138 + (384 - (th * 2 + gap)) / 2;
+      tiles.forEach(({ r, p, t }, i) => {
+        const x = x0 + (i % 2) * (tw2 + gap), y = top + Math.floor(i / 2) * (th + gap);
+        r.setAttribute("x", x.toFixed(1)); r.setAttribute("y", y.toFixed(1)); r.setAttribute("width", tw2.toFixed(1)); r.setAttribute("height", th.toFixed(1));
+        at(p, x + tw2 / 2, y + th / 2, th / 120);
+        t.setAttribute("x", (x + 12).toFixed(1)); t.setAttribute("y", (y + th - 12).toFixed(1));
+      });
+      const px = split + 8, pw = W.x + W.w - 12 - px;
+      panel.setAttribute("x", px.toFixed(1)); panel.setAttribute("width", pw.toFixed(1));
+      const shown = [30, 62, 94, 312];
+      cards.forEach(({ g: cg, r }, i) => {
+        r.setAttribute("width", (pw - 20).toFixed(1));
+        const p = interp(f, [shown[i], shown[i] + 14], [0, 1]);
+        at(cg, px + 10, 146 + i * 94 + (1 - p) * 14); op(cg, p);
+      });
+      const dragging = f >= 146 && f <= 194;
+      spl.setAttribute("x", (split - 1.5).toFixed(1)); spl.setAttribute("class", dragging ? "split on" : "split");
+      const pct = Math.round((split - 82) / 1116 * 100);
+      ratio.querySelector("text").textContent = `${pct} : ${100 - pct}`;
+      at(ratio, split, 160); op(ratio, interp(f, [150, 158], [0, 1]) * interp(f, [222, 232], [1, 0]));
+      const micOff = f >= 260, spkOff = f >= 300;
+      mic.kind(micOff ? "danger" : "accent"); mic.label(micOff ? "마이크 꺼짐" : "마이크 켜짐");
+      spk.kind(spkOff ? "danger" : "accent"); spk.label(spkOff ? "스피커 꺼짐" : "스피커 켜짐");
+      press(mic, f, 260, 620, 562); press(spk, f, 300, 765, 562); at(tts, 925, 562);
+      status.textContent = micOff ? "마이크 꺼짐 — 내 목소리·자막이 나가지 않음" : "자동 자막 켜짐 · 인식 12문장";
+      cursor(f);
+    };
+  },
+});
+
+/* 8. 화면 공유·휴대폰 카메라 */
+SCENES.push({
+  title: "화면 공유·휴대폰", dur: 300,
+  subs: [[0, "«화면 공유»를 누르면 내 화면이 다른 지점에 크게 보입니다."],
+         [150, "«휴대폰 카메라 연결»의 QR 을 휴대폰으로 찍으면, 휴대폰이 보조 카메라가 됩니다."],
+         [250, "휴대폰은 지점마다 1대, 회의당 2대까지입니다. 지점 수에는 세지 않습니다."]],
+  note: "휴대폰 연결 코드는 QR 주소에만 들어 있고, 휴대폰이 읽자마자 주소창에서 지웁니다.",
+  build(g) {
+    const sh = pc("서울 본사"); const d0 = docLines(150, 92); sh.screen.append(d0); at(d0, 0, -15); g.append(sh.g); at(sh.g, 220, 230, 0.85);
+    const bShare = btn("화면 공유", 150, "ghost"); const bPhone = btn("휴대폰 카메라 연결", 200, "ghost"); g.append(bShare); g.append(bPhone);
+    const view = win(620, 400, "하노이 법인의 화면"); at(view, 850, 300); g.append(view);
+    const grid = s("g"); g.append(grid);
+    const gn = ["서울 본사", "부산 공장", "하노이 법인", "댈러스 법인"];
+    [[548, 144], [855, 144], [548, 323], [855, 323]].forEach(([x, y], i) => {
+      grid.append(s("rect", { x, y, width: 297, height: 169, rx: 8, class: "tile" }));
+      const p = person(); at(p, x + 148, y + 84, 1.2); grid.append(p);
+      grid.append(txt(x + 12, y + 156, gn[i], "t t-xs", "start"));
+    });
+    const focus = s("g"); g.append(focus);
+    focus.append(s("rect", { x: 548, y: 144, width: 470, height: 348, rx: 8, class: "tile" }));
+    const big = docLines(420, 260); focus.append(big);
+    const strip = ["서울 본사", "부산 공장", "댈러스 법인"].map((n, i) => {
+      const y = 144 + i * 79; const gg = wrap(s("rect", { x: 1026, y, width: 126, height: 71, rx: 6, class: "tile" }), txt(1034, y + 62, n, "t t-xs", "start"));
+      const p = person(); at(p, 1089, y + 30, 0.55); gg.append(p); focus.append(gg); return gg;
+    });
+    const ph = wrap(s("rect", { x: -63, y: -35.5, width: 126, height: 71, rx: 6, class: "f-soft s-accent" }), txt(-55, 26, "서울 · 휴대폰", "t t-xs t-b", "start"));
+    const php = person(); at(php, 0, -6, 0.55); ph.insertBefore(php, ph.lastChild); g.append(ph);
+    const qr = s("g"); g.append(qr);
+    const N = 21, C = 4.4, half = N * C / 2;
+    qr.append(s("rect", { x: -half - 8, y: -half - 8, width: N * C + 16, height: N * C + 16, rx: 6, class: "f-surface s-line" }));
+    let seed = 7; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+    const finder = (cx, cy) => cx < 8 && cy < 8 || cx > N - 9 && cy < 8 || cx < 8 && cy > N - 9;
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (!finder(x, y) && rnd() > 0.52) qr.append(s("rect", { x: -half + x * C, y: -half + y * C, width: C, height: C, class: "f-text" }));
+    [[0, 0], [N - 7, 0], [0, N - 7]].forEach(([fx, fy]) => {
+      qr.append(s("rect", { x: -half + fx * C, y: -half + fy * C, width: 7 * C, height: 7 * C, class: "f-text" }));
+      qr.append(s("rect", { x: -half + (fx + 1) * C, y: -half + (fy + 1) * C, width: 5 * C, height: 5 * C, class: "f-surface" }));
+      qr.append(s("rect", { x: -half + (fx + 2) * C, y: -half + (fy + 2) * C, width: 3 * C, height: 3 * C, class: "f-text" }));
+    });
+    const scan = s("rect", { x: -half - 6, y: 0, width: N * C + 12, height: 3, class: "f-accent" }); qr.append(scan);
+    const phn = phone(); g.append(phn);
+    const linked = chip(0, 0, "연결됨", "ok"); g.append(linked);
+    const arc = s("path", { d: "M 500 470 Q 760 560 1026 420", pathLength: 1, class: "wire" }); g.insertBefore(arc, ph);
+    const limit = chip(850, 540, "휴대폰: 지점마다 1대 · 회의당 2대"); g.append(limit);
+    const cursor = useCursor(g, [[8, 420, 560], [26, 222, 383], [140, 222, 383], [156, 222, 438]], [30, 160]);
+    return (f) => {
+      pop(bShare, f, 4, 220, 380); pop(bPhone, f, 10, 220, 436);
+      const on = f >= 30; bShare.kind(on ? "accent" : "ghost"); bShare.label(on ? "화면 공유 중" : "화면 공유");
+      if (on) press(bShare, f, 30, 220, 380);
+      if (f >= 158) press(bPhone, f, 160, 220, 436);
+      const p = interp(f, [40, 90], [0, 1], E.inOut);
+      op(grid, 1 - p); op(focus, p); at(big, 783, 318, 0.35 + 0.65 * p);
+      pop(qr, f, 166, 470, 300);
+      scan.setAttribute("y", interp(f, [200, 232], [-half, half], E.inOut).toFixed(1)); op(scan, f >= 200 && f <= 234 ? 1 : 0);
+      const [phx, phy] = keys(f, [[176, 470, 640], [198, 470, 520]], E.out); at(phn, phx, phy); op(phn, interp(f, [176, 186], [0, 1]));
+      pop(linked, f, 234, 470, 404);
+      draw(arc, interp(f, [236, 252], [0, 1])); op(arc, f < 236 ? 0 : interp(f, [270, 290], [1, 0]));
+      pop(ph, f, 250, 1089, 416);
+      op(ph, spring(f - 250) * 3 * p);
+      fadeUp(limit, f, 256, 0, 0);
+      cursor(f);
+    };
+  },
+});
+
+/* 9. 회의 정리·끝내기 */
+SCENES.push({
+  title: "회의 정리·끝내기", dur: 330,
+  subs: [[0, "Host 가 «회의 정리»를 누르면 자막을 바탕으로 요약이 만들어집니다."],
+         [125, "Host 는 회의록을 TXT·JSON·DOCX 로 내려받을 수 있습니다."],
+         [205, "«회의 종료»를 누르면 자막이 서버 메모리에서 지워집니다."],
+         [280, "서버는 stop.bat 으로 끕니다. 다른 PC 에 설치할 때는 배포 설명서를 봅니다."]],
+  note: "요약 엔진은 서버 PC 의 Claude Code 또는 Codex 중 Host 가 고르고, 자막은 고른 엔진의 회사로만 보냅니다. 요약 결과는 요청한 Host 에게만 보이고 서버에 남지 않습니다.",
+  build(g) {
+    g.append(s("rect", { x: 70, y: 100, width: 380, height: 440, rx: 14, class: "f-surface s-line" }));
+    g.append(txt(94, 134, "자막", "t t-sm t-b", "start"));
+    const rowsData = [["서울 본사", "다음 주 출하 일정을 확정합시다."], ["하노이 법인", "재고는 수요일까지 확인하겠습니다."], ["댈러스 법인", "운송 견적을 내일 보내겠습니다."], ["서울 본사", "좋습니다. 금요일에 다시 봅시다."], ["하노이 법인", "네, 금요일에 뵙겠습니다."]];
+    const rows = rowsData.map(([n, t]) => { const r = wrap(txt(0, 0, n, "t t-xs t-dim", "start"), txt(0, 24, t, "t t-sm", "start")); g.append(r); return r; });
+    const cleared = chip(0, 0, "자막을 메모리에서 지웠습니다", "ok"); g.append(cleared);
+    const sum = btn("회의 정리", 150, "ghost"); g.append(sum);
+    const eng = chip(640, 222, "엔진: Claude Code"); g.append(eng);
+    const arrow = s("path", { d: "M 456 300 Q 640 320 812 262", pathLength: 1, class: "wire" }); g.append(arrow);
+    const card = wrap(s("rect", { x: 0, y: 0, width: 400, height: 320, rx: 14, class: "f-surface s-line" }), txt(24, 40, "회의 정리 (예시)", "t t-md", "start"));
+    g.append(card);
+    const bullets = ["결정 · 다음 주 출하 일정 확정", "할 일 · 하노이: 수요일까지 재고 확인", "할 일 · 댈러스: 내일 운송 견적", "다음 회의 · 금요일"]
+      .map((b) => { const t = txt(0, 0, b, "t t-sm", "start"); card.append(t); return t; });
+    const ex = [["TXT", 930, 70], ["JSON", 1015, 80], ["DOCX", 1105, 80]].map(([l, x, w]) => { const b = btn(l, w, "ghost"); g.append(b); return { b, x }; });
+    const docx = fileIcon("DOCX", "회의록.docx"); g.append(docx);
+    const end = btn("회의 종료", 150, "danger"); g.append(end);
+    const fin = wrap(s("rect", { x: -230, y: -84, width: 460, height: 168, rx: 16, class: "f-surface s-accent" }),
+      txt(0, -30, "회의 끝", "t t-md t-dim"), txt(0, 14, "stop.bat", "t t-lg mono"), txt(0, 52, "서버 끄기 · 다른 PC 설치는 docs/deploy.md", "t t-xs t-dim"));
+    g.append(fin);
+    const cursor = useCursor(g, [[8, 480, 600], [26, 642, 173], [128, 642, 173], [146, 1107, 473], [198, 1107, 473], [216, 642, 473]], [30, 150, 220]);
+    return (f) => {
+      rows.forEach((r, i) => {
+        const gone = interp(f, [228 + i * 6, 244 + i * 6], [0, 1]);
+        at(r, 94 + gone * -20, 172 + i * 72); op(r, 1 - gone);
+      });
+      pop(cleared, f, 262, 260, 320);
+      pop(sum, f, 4, 640, 170); if (f >= 28) press(sum, f, 30, 640, 170);
+      fadeUp(eng, f, 40, 0, 0);
+      draw(arrow, interp(f, [44, 70], [0, 1], E.inOut));
+      fadeUp(card, f, 62, 820, 110);
+      bullets.forEach((b, i) => { const p = interp(f, [76 + i * 12, 90 + i * 12], [0, 1]); b.setAttribute("x", 24); b.setAttribute("y", (100 + i * 54 + (1 - p) * 10).toFixed(1)); op(b, p); });
+      ex.forEach(({ b, x }, i) => pop(b, f, 118 + i * 4, x, 470));
+      if (f >= 148) press(ex[2].b, f, 150, 1105, 470);
+      pop(docx, f, 156, 1105, 540);
+      pop(end, f, 198, 640, 470); if (f >= 218) press(end, f, 220, 640, 470);
+      pop(fin, f, 288, 640, 330);
+      cursor(f);
+    };
+  },
+});
+
+/* ---------- 재생기 ---------- */
+const stage = document.getElementById("stage");
+const capEl = document.getElementById("caption-line");
+const bigPlay = document.getElementById("big-play");
+const playBtn = document.getElementById("play-btn");
+const timeEl = document.getElementById("time");
+const track = document.getElementById("track");
+const chapNav = document.getElementById("chapters");
+const speedSel = document.getElementById("speed");
+
+let total = 0;
+for (const sc of SCENES) {
+  sc.start = total; total += sc.dur;
+  sc.g = s("g"); stage.append(sc.g);
+  sc.update = sc.build(sc.g);
+  sc.g.style.display = "none";
+}
+const TOTAL = total;
+const POSTER = 280; // 1장 다 그려진 장면을 표지로
+track.setAttribute("aria-valuemax", String(Math.round(TOTAL / FPS)));
+
+const segs = SCENES.map((sc) => { const d = document.createElement("div"); d.className = "seg"; d.style.flex = `${sc.dur} 1 0`; const i = document.createElement("i"); d.append(i); track.append(d); return { d, i }; });
+const chaps = SCENES.map((sc, k) => {
+  const b = document.createElement("button"); b.type = "button"; b.className = "chap";
+  b.innerHTML = `<b>${k + 1}</b><span></span>`; b.lastChild.textContent = sc.title;
+  b.addEventListener("click", () => { seek(sc.start); play(); });
+  chapNav.append(b); return b;
+});
+const list = document.getElementById("script-list");
+for (const sc of SCENES) {
+  const li = document.createElement("li");
+  const box = document.createElement("div");
+  const h = document.createElement("h3"); h.textContent = sc.title;
+  const p = document.createElement("p"); p.textContent = sc.subs.map(([, t]) => t).join(" ");
+  box.append(h, p);
+  if (sc.note) { const n = document.createElement("p"); n.className = "note"; n.textContent = sc.note; box.append(n); }
+  li.append(box); list.append(li);
+}
+
+let frame = POSTER, playing = false, started = false, speed = 1, last = 0, current = -1, lastSub = null;
+const fmt = (sec) => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, "0")}`;
+function sceneAt(f) { for (let i = SCENES.length - 1; i >= 0; i--) if (f >= SCENES[i].start) return i; return 0; }
+
+function render() {
+  const f = Math.floor(frame), i = sceneAt(f), sc = SCENES[i];
+  if (i !== current) {
+    if (current >= 0) SCENES[current].g.style.display = "none";
+    sc.g.style.display = ""; current = i;
+    chaps.forEach((b, k) => b.setAttribute("aria-current", k === i ? "true" : "false"));
+  }
+  const lf = f - sc.start;
+  let o = 1;
+  if (i > 0) o = Math.min(o, interp(lf, [0, 8], [0, 1], E.lin));
+  if (i < SCENES.length - 1) o = Math.min(o, interp(lf, [sc.dur - 8, sc.dur], [1, 0], E.lin));
+  op(sc.g, o);
+  sc.update(lf);
+  let sub = ""; for (const [t, line] of sc.subs) if (lf >= t) sub = line;
+  if (sub !== lastSub) { capEl.textContent = sub || " "; lastSub = sub; }
+  const shown = started ? f : 0;
+  segs.forEach(({ d, i: bar }, k) => {
+    const s0 = SCENES[k];
+    bar.style.width = `${clamp((shown - s0.start) / s0.dur, 0, 1) * 100}%`;
+    d.classList.toggle("on", started && k === i);
+  });
+  timeEl.textContent = `${fmt(shown / FPS)} / ${fmt(TOTAL / FPS)}`;
+  track.setAttribute("aria-valuenow", String(Math.round(shown / FPS)));
+  track.setAttribute("aria-valuetext", `${fmt(shown / FPS)}, ${sc.title}`);
+}
+function syncUi() {
+  const atEnd = frame >= TOTAL - 1;
+  playBtn.innerHTML = `<svg class="icon ${playing || !atEnd ? "solid" : ""}"><use href="#i-${playing ? "pause" : atEnd ? "replay" : "play"}"></use></svg>`;
+  playBtn.setAttribute("aria-label", playing ? "멈춤" : atEnd ? "다시 보기" : "재생");
+  const showBig = !playing && (!started || atEnd);
+  bigPlay.hidden = !showBig;
+  bigPlay.classList.toggle("replay", atEnd);
+  bigPlay.innerHTML = `<svg class="icon"><use href="#i-${atEnd ? "replay" : "play"}"></use></svg>`;
+  bigPlay.setAttribute("aria-label", atEnd ? "다시 보기" : "처음부터 재생");
+}
+function tick(now) {
+  if (!playing) return;
+  const dt = Math.min(100, now - last); last = now;
+  frame += dt / 1000 * FPS * speed;
+  if (frame >= TOTAL - 1) { frame = TOTAL - 1; playing = false; render(); syncUi(); return; }
+  render(); requestAnimationFrame(tick);
+}
+function play() {
+  if (playing) return;
+  if (!started || frame >= TOTAL - 1) frame = 0;
+  started = true; playing = true; last = performance.now();
+  render(); syncUi(); requestAnimationFrame(tick);
+}
+function pause() { playing = false; syncUi(); }
+function toggle() { playing ? pause() : play(); }
+function seek(f) { started = true; frame = clamp(f, 0, TOTAL - 1); render(); syncUi(); }
+
+playBtn.addEventListener("click", toggle);
+bigPlay.addEventListener("click", play);
+speedSel.addEventListener("change", () => { speed = Number(speedSel.value) || 1; });
+let dragging = false;
+const seekX = (e) => { const r = track.getBoundingClientRect(); seek(clamp((e.clientX - r.left) / r.width, 0, 1) * (TOTAL - 1)); };
+track.addEventListener("pointerdown", (e) => { dragging = true; track.setPointerCapture(e.pointerId); seekX(e); });
+track.addEventListener("pointermove", (e) => { if (dragging) seekX(e); });
+track.addEventListener("pointerup", () => { dragging = false; });
+track.addEventListener("pointercancel", () => { dragging = false; });
+document.addEventListener("keydown", (e) => {
+  const tag = e.target.tagName;
+  if (tag === "BUTTON" || tag === "SELECT" || tag === "INPUT" || e.altKey || e.ctrlKey || e.metaKey) return;
+  if (e.key === " ") { e.preventDefault(); toggle(); }
+  else if (e.key === "ArrowRight") { e.preventDefault(); seek((started ? frame : 0) + 5 * FPS); }
+  else if (e.key === "ArrowLeft") { e.preventDefault(); seek((started ? frame : 0) - 5 * FPS); }
+  else if (e.key === "Home" && e.target === track) { e.preventDefault(); seek(0); }
+  else if (e.key === "End" && e.target === track) { e.preventDefault(); seek(TOTAL - 1); }
+});
+
+/* 테마 전환 — 선택은 이 브라우저에만 기억 */
+const themeBtn = document.getElementById("theme-btn");
+function syncTheme() {
+  const dark = document.documentElement.dataset.theme !== "light";
+  themeBtn.innerHTML = `<svg class="icon"><use href="#i-${dark ? "sun" : "moon"}"></use></svg>`;
+  themeBtn.setAttribute("aria-label", dark ? "밝은 화면으로 바꾸기" : "어두운 화면으로 바꾸기");
+  themeBtn.title = themeBtn.getAttribute("aria-label");
+}
+themeBtn.addEventListener("click", () => {
+  const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem("visionmeeting-explainer-theme", next); } catch (error) { /* 기억 못 해도 전환은 된다 */ }
+  syncTheme();
+});
+syncTheme();
+render(); syncUi();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+* text=auto
+# Windows 실행 파일은 CRLF 로 받아야 cmd/PowerShell 이 바르게 읽는다
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+*.py text eol=lf

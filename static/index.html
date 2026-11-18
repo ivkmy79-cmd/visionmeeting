@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>회의 입장 — VisionMeeting</title>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<script>
+  // 첫 화면 그리기 전에 테마를 적용해 밝은 화면이 깜빡이지 않게 한다. 기본값은 어둡게.
+  (function () {
+    var theme = "dark";
+    try { theme = localStorage.getItem("translator-theme") === "light" ? "light" : "dark"; } catch (e) {}
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<!-- Lucide 아이콘 (lucide-static v0.460.0, ISC License) -->
+<svg xmlns="http://www.w3.org/2000/svg" hidden>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+  <symbol id="i-smartphone" viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></symbol>
+  <symbol id="i-maximize-2" viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" x2="14" y1="3" y2="10"/><line x1="3" x2="10" y1="21" y2="14"/></symbol>
+  <symbol id="i-minimize-2" viewBox="0 0 24 24"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" x2="21" y1="10" y2="3"/><line x1="3" x2="10" y1="21" y2="14"/></symbol>
+  <symbol id="i-screen-share" viewBox="0 0 24 24"><path d="M13 3H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-3"/><path d="M8 21h8"/><path d="M12 17v4"/><path d="m17 8 5-5"/><path d="M17 3h5v5"/></symbol>
+  <symbol id="i-book-open" viewBox="0 0 24 24"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></symbol>
+  <symbol id="i-screen-share-off" viewBox="0 0 24 24"><path d="M13 3H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-3"/><path d="M8 21h8"/><path d="M12 17v4"/><path d="m22 3-5 5"/><path d="m17 3 5 5"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></symbol>
+  <symbol id="i-mic-off" viewBox="0 0 24 24"><line x1="2" x2="22" y1="2" y2="22"/><path d="M18.89 13.23A7.12 7.12 0 0 0 19 12v-2"/><path d="M5 10v2a7 7 0 0 0 12 5"/><path d="M15 9.34V5a3 3 0 0 0-5.68-1.33"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12"/><line x1="12" x2="12" y1="19" y2="22"/></symbol>
+  <symbol id="i-volume-2" viewBox="0 0 24 24"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.364 18.364a9 9 0 0 0 0-12.728"/></symbol>
+  <symbol id="i-volume-x" viewBox="0 0 24 24"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><line x1="22" x2="16" y1="9" y2="15"/><line x1="16" x2="22" y1="9" y2="15"/></symbol>
+</svg>
+
+<!-- 개설 / 참여 화면 -->
+<main id="join-view" class="center-view">
+  <section class="card">
+    <div class="card-head">
+      <h1>VisionMeeting <span class="tag">PoC</span></h1>
+      <div class="head-actions">
+        <a class="ghost help-link" href="/help" target="_blank" rel="noopener" title="사용 설명서를 새 탭에서 엽니다">
+          <svg class="icon"><use href="#i-book-open"></use></svg>사용 설명서</a>
+        <button type="button" class="icon-btn theme-toggle" aria-label="화면 테마 바꾸기" title="화면 테마 바꾸기">
+          <svg class="icon"><use href="#i-sun"></use></svg>
+        </button>
+      </div>
+    </div>
+
+    <div id="caption-check" class="badge badge-unknown">
+      <span class="dot"></span><span class="badge-text">자막 지원 확인 중</span>
+    </div>
+    <p id="caption-check-reason" class="reason" hidden></p>
+
+    <div class="segmented" role="tablist" aria-label="회의 개설 또는 참여">
+      <button type="button" id="mode-create" role="tab" aria-selected="true">회의 개설</button>
+      <button type="button" id="mode-join" role="tab" aria-selected="false">회의 참여</button>
+    </div>
+
+    <!-- 개설 -->
+    <div id="create-pane">
+      <p id="create-blocked" class="error" hidden></p>
+      <div id="create-form">
+        <div id="create-code-field" hidden>
+          <label for="create-code">개설 코드</label>
+          <input id="create-code" type="password" maxlength="64" autocomplete="off" placeholder="관리자에게 받은 개설 코드">
+        </div>
+        <button type="button" id="create-btn" class="secondary">회의 만들기</button>
+        <p id="create-error" class="error" hidden></p>
+      </div>
+
+      <div id="created" class="created" hidden>
+        <div class="created-row"><span>회의 ID</span><strong id="created-id"></strong></div>
+        <div class="created-row"><span>비밀번호</span><strong id="created-pw"></strong></div>
+        <label for="invite-link">초대 링크 (비밀번호 포함)</label>
+        <div class="form-row">
+          <div class="field grow"><input id="invite-link" type="text" readonly></div>
+          <div class="field">
+            <button type="button" class="ghost control copy-invite"><svg class="icon"><use href="#i-copy"></use></svg>복사</button>
+          </div>
+        </div>
+        <p class="reason">링크는 참석 지점에만 보내세요. 이 회의가 끝나면 링크와 비밀번호는 바로 무효가 됩니다.</p>
+      </div>
+    </div>
+
+    <!-- 참여 -->
+    <div id="join-pane" hidden>
+      <div class="form-row">
+        <div class="field grow">
+          <label for="meeting-id">회의 ID</label>
+          <input id="meeting-id" type="text" inputmode="numeric" maxlength="13" autocomplete="off" placeholder="123-456-789">
+        </div>
+        <div class="field grow">
+          <label for="meeting-pw">비밀번호</label>
+          <input id="meeting-pw" type="password" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="6자리">
+        </div>
+      </div>
+    </div>
+
+    <!-- 공통: 지점 정보 + 장치 미리보기 -->
+    <div id="site-fields">
+      <div class="form-row">
+        <div class="field grow">
+          <label for="site-name">지점 이름</label>
+          <input id="site-name" type="text" maxlength="30" autocomplete="off" placeholder="예: 서울 회의실">
+        </div>
+        <div class="field">
+          <label for="site-lang">이 지점의 언어</label>
+          <select id="site-lang"></select>
+        </div>
+      </div>
+
+      <div class="preview">
+        <video id="preview-video" autoplay muted playsinline></video>
+        <p id="preview-empty" class="preview-empty">카메라·마이크를 확인하려면 아래 버튼을 누르세요.</p>
+      </div>
+      <div class="meter" aria-hidden="true"><div id="mic-meter" class="meter-fill"></div></div>
+      <p id="preview-status" class="reason"></p>
+
+      <div class="form-row">
+        <div class="field grow">
+          <label for="camera-select">카메라</label>
+          <select id="camera-select" disabled><option>장치 확인 전</option></select>
+        </div>
+        <div class="field grow">
+          <label for="mic-select">마이크</label>
+          <select id="mic-select" disabled><option>장치 확인 전</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field grow"><button type="button" id="preview-btn" class="ghost control">카메라·마이크 확인</button></div>
+        <div class="field"><button type="button" id="cam-toggle" class="ghost control" aria-pressed="true">카메라 켜짐</button></div>
+        <div class="field"><button type="button" id="mic-toggle" class="ghost control" aria-pressed="true">마이크 켜짐</button></div>
+      </div>
+
+      <div class="notice">
+        <strong>전송 안내</strong>
+        <p>영상과 음성은 참석 지점의 PC 끼리 직접 암호화 전송되며 서버에 저장되지 않습니다.
+        자동 자막을 위해 <b>마이크가 켜져 있는 동안의 말</b>은 <b>브라우저의 음성 인식 서비스</b>(Chrome 은 Google)로 전송되어 글자로 바뀝니다.
+        회의 화면에서 <b>마이크를 끄면</b> 전송되지 않습니다.
+        번역은 각 PC 의 브라우저 안에서 처리됩니다.
+        자막은 회의가 끝나면 삭제됩니다.</p>
+        <label class="check">
+          <input id="consent" type="checkbox">
+          <span>위 내용을 확인했으며 음성 전송에 동의합니다.</span>
+        </label>
+      </div>
+
+      <button id="join-btn" class="primary" disabled>입장</button>
+      <p id="join-hint" class="reason" hidden></p>
+      <p id="join-error" class="error" hidden></p>
+    </div>
+  </section>
+</main>
+
+<!-- 회의 화면 -->
+<div id="meeting-view" hidden>
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="room-label">회의</span>
+      <strong id="room-code"></strong>
+      <button type="button" class="ghost copy-invite" title="초대 링크 복사"><svg class="icon"><use href="#i-copy"></use></svg>초대 링크</button>
+      <button type="button" id="tunnel-btn" class="ghost" hidden
+              title="다른 망(외국) 참석자용 링크 — 누르면 이 서버를 인터넷 주소로 열고 링크를 복사합니다">외부 참석 링크</button>
+      <button type="button" id="tunnel-stop" class="ghost" hidden title="인터넷 주소를 닫습니다(외부 참석자 연결이 끊깁니다)">외부 공개 끄기</button>
+    </div>
+    <div class="topbar-right">
+      <div id="caption-badge" class="badge badge-unknown">
+        <span class="dot"></span><span class="badge-text">자막 지원 확인 중</span>
+      </div>
+      <div id="conn-badge" class="badge badge-unknown">
+        <span class="dot"></span><span class="badge-text">연결 중</span>
+      </div>
+      <div id="relay-badge" class="badge badge-unknown" hidden>
+        <span class="dot"></span><span class="badge-text">외부 중계</span>
+      </div>
+      <div id="relay-quota" class="badge badge-unknown" hidden>
+        <span class="dot"></span><span class="badge-text">중계 사용량 확인 중</span>
+      </div>
+      <span id="participant-count" class="count">접속 0곳</span>
+      <div id="host-controls" hidden>
+        <select id="relay-select" class="engine-select" aria-label="중계 서비스">
+          <option value="cloudflare">중계: Cloudflare</option>
+          <option value="metered">중계: Metered</option>
+        </select>
+        <button type="button" id="relay-extend" class="ghost" hidden
+                title="Cloudflare 900 GB 를 넘어 중계 연결이 음성만 보내는 중 — 이 회의만 950 GB(차단)까지 영상을 다시 보냅니다">950 GB까지 영상 연장</button>
+        <select id="summary-engine" class="engine-select" aria-label="회의 정리 엔진"
+                title="회의 정리 엔진 — 고른 엔진의 회사로만 자막이 전송됩니다"></select>
+        <button id="summarize" class="ghost">회의 정리</button>
+        <button id="export-txt" class="ghost">TXT</button>
+        <button id="export-json" class="ghost">JSON</button>
+        <button id="export-docx" class="ghost">DOCX</button>
+        <button id="end-room" class="ghost danger">회의 종료</button>
+      </div>
+      <a class="ghost help-link" href="/help" target="_blank" rel="noopener" title="사용 설명서를 새 탭에서 엽니다(회의는 그대로 이어집니다)">
+        <svg class="icon"><use href="#i-book-open"></use></svg>설명서</a>
+      <button type="button" class="icon-btn theme-toggle" aria-label="화면 테마 바꾸기" title="화면 테마 바꾸기">
+        <svg class="icon"><use href="#i-sun"></use></svg>
+      </button>
+    </div>
+  </header>
+
+  <ul id="participants" class="participants"></ul>
+
+  <!-- 영상(왼쪽) | 폭 조절 막대 | 자막(오른쪽). 기본 70:30, 막대를 끌어 조절(이 PC 에 기억). 900px 미만은 위아래로 쌓는다 -->
+  <div id="stage" class="stage">
+  <div id="stage-video" class="stage-video">
+  <!-- 영상 (3단계에서 배치 4종으로 확장). video-wrap = 화면 분석·회의 정리를 뺀 남은 높이 — 타일 크기 기준 -->
+  <div id="video-wrap" class="video-wrap">
+  <section id="video-grid" class="video-grid" aria-label="참석 지점 영상"></section>
+  </div>
+  <section id="vl-panel" class="vl-panel" aria-live="polite" hidden>
+    <div class="vl-head"><span id="vl-mock" class="mock-badge">MOCK</span><strong>공유 화면 분석</strong><span id="vl-engine" class="vl-engine"></span></div>
+    <p id="vl-text" class="vl-text"></p>
+  </section>
+
+  <!-- Host 전용 회의 정리 결과 -->
+  <section id="summary-panel" class="summary" hidden>
+    <div class="summary-head">
+      <strong>회의 정리</strong>
+      <span id="summary-meta" class="count"></span>
+      <div id="summary-tabs" class="summary-tabs"></div>
+      <button id="summary-close" class="ghost">닫기</button>
+    </div>
+    <div id="summary-body" class="summary-body"></div>
+  </section>
+  </div>
+
+  <div id="stage-splitter" class="stage-splitter" role="separator" tabindex="0" aria-orientation="vertical"
+       aria-controls="stage-video" aria-label="영상과 자막 폭 조절" aria-valuemin="40" aria-valuemax="85" aria-valuenow="70"
+       title="끌어서 영상·자막 폭을 바꿉니다(← → 키도 됨) · 두 번 누르면 70:30 으로"></div>
+
+  <section id="stage-captions" class="stage-captions" aria-label="자막">
+  <main id="transcript" class="transcript" aria-live="polite"></main>
+  <div id="interim" class="interim" aria-live="off" hidden></div>
+  </section>
+  </div>
+
+  <!-- 2026-11-18 사용자 요청 «화상 화면이 작다»: 아래 조작부를 한 줄(넓은 화면)로 줄여 영상 자리를 넓힌다. 라벨은 상자 왼쪽에 작게 -->
+  <footer class="bottombar">
+    <p id="media-status" class="reason media-status" hidden></p>
+    <div class="bar-row">
+    <div class="media-bar form-row">
+      <div class="field inline">
+        <label for="meet-camera">카메라</label>
+        <select id="meet-camera" disabled><option>장치 확인 전</option></select>
+      </div>
+      <div class="field inline">
+        <label for="meet-mic">마이크</label>
+        <select id="meet-mic" disabled><option>장치 확인 전</option></select>
+      </div>
+      <div class="field"><button type="button" id="meet-cam-toggle" class="ghost control" aria-pressed="true">카메라 켜짐</button></div>
+      <div class="field"><button type="button" id="phone-camera" class="ghost control" title="휴대폰 카메라 연결"><svg class="icon"><use href="#i-smartphone"></use></svg>휴대폰</button></div>
+      <div class="field inline">
+        <label for="layout-select" title="화면 배치는 이 PC 에만 적용됩니다">화면 배치</label>
+        <select id="layout-select" title="화면 배치 (나에게만 적용)">
+          <option value="auto">자동 — 화면 공유 중이면 공유 화면 크게</option>
+          <option value="grid">바둑판</option>
+          <option value="row">가로 한 줄</option>
+          <option value="pin">특정인 크게</option>
+          <option value="speaker">말하는 사람 크게</option>
+        </select>
+      </div>
+      <div class="field"><button type="button" id="screen-share" class="ghost control share-toggle" aria-pressed="false"><svg class="icon"><use href="#i-screen-share"></use></svg><span>화면 공유</span></button></div>
+    </div>
+    <!-- Q32: 버튼 없이 대화·자동 자막. 마이크·스피커 끄기는 작은 버튼으로 같은 줄에(2026-11-16 사용자 요청 «너무 크다») -->
+    <div class="talk-options">
+      <button type="button" id="meet-mic-toggle" class="talk" aria-pressed="true"
+              title="내 목소리와 자동 자막을 끄거나 켭니다(끄면 음성 인식 서비스로도 보내지 않습니다)"><svg class="icon"><use href="#i-mic"></use></svg><span>마이크 켜짐</span></button>
+      <button type="button" id="speaker-toggle" class="talk" aria-pressed="true"
+              title="다른 지점의 목소리와 번역 음성을 이 PC 에서 끄거나 켭니다(자막은 계속 보입니다)"><svg class="icon"><use href="#i-volume-2"></use></svg><span>스피커 켜짐</span></button>
+      <button type="button" id="settings-toggle" class="ghost control continuous-toggle settings-toggle" aria-pressed="false"
+              title="공유 화면을 크게 보는 동안 접어 둔 카메라·마이크·화면 배치 설정을 펼칩니다">장치·배치 설정 펼치기</button>
+      <button type="button" id="tts-btn" class="ghost control continuous-toggle" aria-pressed="false"
+              title="다른 지점의 말을 이 PC 의 브라우저 음성으로 읽어 줍니다. 읽는 동안 상대 원음은 작아집니다">번역 음성: 꺼짐</button>
+    </div>
+    </div>
+    <p id="floor-status" class="floor-status">자동 자막 준비 중…</p>
+  </footer>
+</div>
+
+<!-- 휴대폰 보조 카메라 QR (Q25) -->
+<dialog id="camera-dialog" class="dialog" aria-labelledby="camera-dialog-title">
+  <h2 id="camera-dialog-title">휴대폰 카메라 연결</h2>
+  <p class="reason">휴대폰 기본 카메라로 아래 QR 을 찍으면 이 지점의 «현장 카메라»로 연결됩니다.
+    QR 은 5분 동안 한 번만 쓸 수 있습니다.</p>
+  <div class="qr-box"><canvas id="camera-qr" width="264" height="264" aria-label="휴대폰 연결 QR 코드"></canvas></div>
+  <p id="camera-qr-timer" class="count qr-timer"></p>
+  <p id="camera-qr-error" class="error" hidden></p>
+  <details class="qr-link">
+    <summary>QR 이 안 찍히면 주소 보기</summary>
+    <input id="camera-qr-url" type="text" readonly>
+  </details>
+  <p class="reason">사내망 주소로 연결할 때는 휴대폰이 같은 Wi-Fi 에 있고 서버의 <b>rootCA.pem</b> 인증서가 설치돼 있어야 합니다.</p>
+  <div class="form-row">
+    <div class="field grow"><button type="button" id="camera-qr-new" class="ghost control">새 QR</button></div>
+    <div class="field grow"><button type="button" id="camera-qr-close" class="ghost control">닫기</button></div>
+  </div>
+</dialog>
+
+<script src="/static/vendor/qrcode.js"></script>
+<script src="/static/rtc.js"></script>
+<script src="/static/captions.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

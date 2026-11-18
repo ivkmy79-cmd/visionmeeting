@@ -1,0 +1,973 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+CiAgPCEtLSBMdWNpZGUgInZpZGVvIiAobHVjaWRlLXN0YXRpYyB2MC40NjAuMCwgSVNDKSBvbiBhY2NlbnQgYmFja2dyb3VuZCAtLT4KICA8cmVjdCB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHJ4PSI1IiBmaWxsPSIjMzE1OUQ5Ii8+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNCA0KSBzY2FsZSgwLjY2NjcpIiBmaWxsPSJub25lIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMi4yNSIKICAgICBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogICAgPHBhdGggZD0ibTE2IDEzIDUuMjIzIDMuNDgyYS41LjUgMCAwIDAgLjc3Ny0uNDE2VjcuODdhLjUuNSAwIDAgMC0uNzUyLS40MzJMMTYgMTAuNSIvPgogICAgPHJlY3QgeD0iMiIgeT0iNiIgd2lkdGg9IjE0IiBoZWlnaHQ9IjEyIiByeD0iMiIvPgogIDwvZz4KPC9zdmc+Cg==">
+<style>body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>VisionMeeting 설치 따라하기</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<script>
+  try {
+    const saved = localStorage.getItem("visionmeeting-explainer-theme");
+    if (saved === "light" || saved === "dark") document.documentElement.dataset.theme = saved;
+  } catch (error) { /* 저장소를 못 쓰면 기본(어두운 테마) */ }
+</script>
+<style>
+/* Layout: 머리 → 16:9 무대(프레임 단위 애니메이션, 자막 줄) + 재생 막대 → 장면 칩 → 장면별 해설(글).
+   토큰은 프로젝트 DESIGN.md·static/style.css 값 그대로. 어두운 테마가 기본(Q22), 밝은 테마는 전환 버튼. */
+:root {
+  --bg: #10151C;
+  --surface: #1A2029;
+  --surface-2: #141A22;
+  --surface-strong: #2A323D;
+  --border: #2A323D;
+  --border-strong: #5E6A79;
+  --text: #E6EAF0;
+  --text-dim: #9AA6B4;
+  --accent: #5B82E8;
+  --accent-soft: #22304F;
+  --on-accent: #10151C;
+  --ok: #2FA968;
+  --warn: #C79A3A;
+  --danger: #E4655F;
+  --font: "Segoe UI", "Malgun Gothic", system-ui, sans-serif;
+  --mono: "Cascadia Mono", Consolas, "D2Coding", ui-monospace, monospace;
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --bg: #eef2f7;
+  --surface: #ffffff;
+  --surface-2: #f6f8fb;
+  --surface-strong: #e8eef7;
+  --border: #d7dee8;
+  --border-strong: #aeb9c8;
+  --text: #172033;
+  --text-dim: #5c6a7d;
+  --accent: #3159d9;
+  --accent-soft: #eaf0ff;
+  --on-accent: #ffffff;
+  --ok: #137a4e;
+  --warn: #9a5700;
+  --danger: #c63636;
+  color-scheme: light;
+}
+
+html { background: var(--bg); }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.6 var(--font);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 48px;
+}
+button, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.wrap { max-width: 1100px; margin: 0 auto; display: grid; gap: 16px; }
+
+header { display: flex; gap: 16px; align-items: flex-start; justify-content: space-between; }
+header .lead { min-width: 0; }
+h1 { margin: 0; font-size: 1.6rem; line-height: 1.3; text-wrap: balance; }
+.sub { margin: 4px 0 0; color: var(--text-dim); max-width: 65ch; }
+.kbd { font-family: var(--mono); font-size: .85em; padding: 0 6px; border: 1px solid var(--border-strong); border-radius: 4px; }
+.icon-btn {
+  flex: none; width: 40px; height: 40px; display: grid; place-items: center;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px; cursor: pointer;
+}
+.icon-btn:hover { border-color: var(--border-strong); }
+.icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* 무대 */
+.player { display: grid; gap: 10px; }
+/* 그림(16:9) 아래에 자막 띠를 따로 두어 그림을 가리지 않는다 */
+.stage-wrap {
+  width: 100%; max-width: 100%;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+  container-type: inline-size;
+}
+.screen { position: relative; }
+#stage { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; }
+.caption-line {
+  margin: 0; min-height: 3.2em; display: flex; align-items: center; justify-content: center;
+  border-top: 1px solid var(--border); background: var(--surface);
+  color: var(--text); font-size: clamp(14px, 1.9cqw, 21px); font-weight: 600; line-height: 1.45;
+  padding: .3em 1em; text-align: center; text-wrap: balance;
+}
+.big-play {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: clamp(56px, 9cqw, 88px); aspect-ratio: 1; border-radius: 50%; border: 0; cursor: pointer;
+  background: var(--accent); color: var(--on-accent); display: grid; place-items: center;
+  box-shadow: 0 6px 24px color-mix(in srgb, var(--bg) 60%, transparent);
+}
+.big-play .icon { width: 42%; height: 42%; fill: currentColor; stroke: none; }
+.big-play.replay .icon { fill: none; stroke: currentColor; stroke-width: 2.4; }
+
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; }
+.ctrl {
+  height: 36px; min-width: 36px; padding: 0 10px; display: inline-flex; align-items: center; gap: 6px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px; cursor: pointer;
+}
+.ctrl:hover { border-color: var(--border-strong); }
+.ctrl .icon { width: 18px; height: 18px; }
+.ctrl .icon.solid { fill: currentColor; stroke: none; }
+.time { font-variant-numeric: tabular-nums; color: var(--text-dim); font-size: .9rem; min-width: 92px; }
+.track {
+  flex: 1 1 320px; min-width: 0; height: 28px; display: flex; gap: 3px; align-items: center;
+  cursor: pointer; touch-action: none; border-radius: 6px;
+}
+.seg { position: relative; height: 8px; background: var(--surface-strong); border-radius: 4px; overflow: hidden; }
+.seg.on { height: 12px; }
+.seg i { position: absolute; inset: 0 auto 0 0; background: var(--accent); }
+.speed { height: 36px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0 8px; }
+
+.chapters { display: flex; flex-wrap: wrap; gap: 8px; }
+.chap {
+  display: inline-flex; align-items: baseline; gap: 6px; padding: 6px 12px; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 999px; font-size: .9rem;
+}
+.chap b { font-variant-numeric: tabular-nums; color: var(--text-dim); font-weight: 600; }
+.chap[aria-current="true"] { background: var(--accent-soft); border-color: var(--accent); }
+.chap[aria-current="true"] b { color: var(--accent); }
+
+/* 장면별 해설 */
+.script { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; }
+.script h2 { margin: 0 0 4px; font-size: 1.15rem; }
+.script > p { margin: 0 0 12px; color: var(--text-dim); }
+.script ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 14px; counter-reset: s; }
+.script li { counter-increment: s; display: grid; grid-template-columns: 2.2em minmax(0, 1fr); gap: 0 8px; }
+.script li::before { content: counter(s); font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+.script h3 { margin: 0; font-size: 1rem; }
+.script li p { margin: 2px 0 0; max-width: 70ch; }
+.script .note { color: var(--text-dim); font-size: .875rem; }
+footer { color: var(--text-dim); font-size: .8125rem; }
+
+/* SVG 무대 안 — 색은 모두 토큰 */
+.bg-dot { fill: var(--border); }
+.f-surface { fill: var(--surface); } .f-bg { fill: var(--bg); } .f-strong { fill: var(--surface-strong); }
+.f-soft { fill: var(--accent-soft); } .f-accent { fill: var(--accent); } .f-ok { fill: var(--ok); }
+.f-warn { fill: var(--warn); } .f-danger { fill: var(--danger); } .f-text { fill: var(--text); }
+.tile { fill: color-mix(in srgb, var(--text) 9%, var(--bg)); }
+.s-line { stroke: var(--border-strong); stroke-width: 1.5; }
+.s-accent { stroke: var(--accent); stroke-width: 2; }
+.nofill { fill: none; }
+.t { fill: var(--text); font-family: var(--font); }
+.t-dim { fill: var(--text-dim); } .t-accent { fill: var(--accent); } .t-ok { fill: var(--ok); }
+.t-warn { fill: var(--warn); } .t-danger { fill: var(--danger); }
+.t-xl { font-size: 68px; font-weight: 700; letter-spacing: -0.5px; }
+.t-lg { font-size: 32px; font-weight: 700; }
+.t-md { font-size: 22px; font-weight: 600; }
+.t-sm { font-size: 17px; font-weight: 500; }
+.t-xs { font-size: 14px; font-weight: 500; }
+.t-b { font-weight: 700; }
+.mono { font-family: var(--mono); }
+.chip-soft { fill: var(--accent-soft); } .chip-flat { fill: var(--surface-strong); }
+.b-accent { fill: var(--accent); } .b-ghost { fill: var(--surface-strong); } .b-danger { fill: var(--danger); }
+.b-off { fill: var(--surface-strong); opacity: .55; }
+.bt-accent, .bt-danger { fill: var(--on-accent); font-weight: 700; }
+.bt-ghost { fill: var(--text); font-weight: 600; } .bt-off { fill: var(--text-dim); }
+.person { fill: var(--text-dim); opacity: .6; }
+.wire { fill: none; stroke: var(--accent); stroke-width: 3; stroke-dasharray: 1; }
+.wire.ok { stroke: var(--ok); }
+.wire.dim { stroke: var(--text-dim); stroke-width: 2.5; }
+.sig { fill: none; stroke: var(--text-dim); stroke-width: 2; stroke-dasharray: 6 7; }
+.pkt { fill: var(--accent); } .pkt.ok { fill: var(--ok); } .pkt.dim { fill: var(--text-dim); }
+.xmark { stroke: var(--danger); stroke-width: 7; stroke-linecap: round; }
+.ripple { fill: none; stroke: var(--accent); stroke-width: 3; }
+.cursor { fill: var(--text); stroke: var(--bg); stroke-width: 1.5; }
+.wave { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; }
+.interim { fill: var(--bg); stroke: var(--text-dim); stroke-width: 1.5; stroke-dasharray: 6 5; }
+.final { fill: var(--surface); stroke: var(--accent); stroke-width: 2; }
+.lock-arc { fill: none; stroke: var(--ok); stroke-width: 2.5; }
+.check { fill: none; stroke: var(--on-accent); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.split { fill: var(--border-strong); } .split.on { fill: var(--accent); }
+.ring { fill: none; stroke: var(--warn); stroke-width: 3; }
+
+[hidden] { display: none !important; }
+@media (max-width: 640px) {
+  .script { padding: 16px; }
+  .time { min-width: 0; }
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-play" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"></polygon></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"></rect><rect x="14" y="4" width="4" height="16" rx="1"></rect></symbol>
+  <symbol id="i-replay" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></symbol>
+</svg>
+
+<div class="wrap">
+  <header>
+    <div class="lead">
+      <h1>VisionMeeting 설치 따라하기</h1>
+      <p class="sub">설치 압축 파일을 받은 뒤 새 서버 PC 에서 할 일 10단계, 1분 50초. ▶ 를 누르거나 아래 단계를 고르세요.
+        <span class="kbd">Space</span> 재생·멈춤, <span class="kbd">←</span> <span class="kbd">→</span> 5초 이동.</p>
+    </div>
+    <button type="button" class="icon-btn" id="theme-btn" aria-label="화면 테마 바꾸기" title="화면 테마 바꾸기">
+      <svg class="icon"><use href="#i-sun"></use></svg>
+    </button>
+  </header>
+
+  <section class="player" aria-label="설치 과정 영상">
+    <div class="stage-wrap" id="stage-wrap">
+      <div class="screen">
+      <svg id="stage" viewBox="0 0 1280 720" role="img" aria-label="VisionMeeting 설치 과정을 보여 주는 움직이는 그림. 내용은 아래 단계별 해설과 같습니다.">
+        <defs>
+          <pattern id="dots" width="32" height="32" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.2" class="bg-dot"></circle></pattern>
+        </defs>
+        <rect width="1280" height="720" fill="url(#dots)"></rect>
+      </svg>
+      <button type="button" class="big-play" id="big-play" aria-label="처음부터 재생">
+        <svg class="icon"><use href="#i-play"></use></svg>
+      </button>
+      </div>
+      <p class="caption-line" id="caption-line" aria-live="off">&nbsp;</p>
+    </div>
+    <div class="controls">
+      <button type="button" class="ctrl" id="play-btn" aria-label="재생"><svg class="icon solid"><use href="#i-play"></use></svg></button>
+      <span class="time" id="time">0:00 / 0:00</span>
+      <div class="track" id="track" role="slider" tabindex="0" aria-label="재생 위치" aria-valuemin="0"></div>
+      <select class="speed" id="speed" aria-label="재생 속도">
+        <option value="0.75">0.75배</option>
+        <option value="1" selected>1배</option>
+        <option value="1.25">1.25배</option>
+        <option value="1.5">1.5배</option>
+      </select>
+    </div>
+    <nav class="chapters" id="chapters" aria-label="단계 고르기"></nav>
+  </section>
+
+  <section class="script" aria-labelledby="script-title">
+    <h2 id="script-title">단계별 해설</h2>
+    <p>영상의 자막 문장과 같은 내용입니다. 영상을 틀지 않고 읽어도 됩니다.</p>
+    <ol id="script-list"></ol>
+  </section>
+
+  <footer>2026-11-16 기준입니다. 같은 내용을 글로 쓴 설명서는 압축 파일 안의 docs\deploy.md 이고, 회의 화면 사용법은 «VisionMeeting 움직이는 설명서»와 /help 에 있습니다.
+    그림 속 주소·버전·값은 예시이고, 설치 프로그램 화면은 버전에 따라 조금 다를 수 있습니다.</footer>
+</div>
+
+<script>
+(() => {
+"use strict";
+const FPS = 30;
+const NS = "http://www.w3.org/2000/svg";
+
+/* ---------- 프레임 계산 (Remotion 의 interpolate·spring 과 같은 생각: 모든 움직임은 프레임 번호의 함수) ---------- */
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const E = {
+  out: (t) => 1 - Math.pow(1 - t, 3),
+  inOut: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
+  lin: (t) => t,
+};
+function interp(f, [a, b], [c, d], e = E.out) {
+  if (b === a) return f < a ? c : d;
+  return c + (d - c) * e(clamp((f - a) / (b - a), 0, 1));
+}
+function spring(t) {
+  if (t <= 0) return 0;
+  const sec = t / FPS, w0 = Math.sqrt(170), z = 14 / (2 * w0), wd = w0 * Math.sqrt(1 - z * z);
+  return 1 - Math.exp(-z * w0 * sec) * (Math.cos(wd * sec) + (z * w0 / wd) * Math.sin(wd * sec));
+}
+function keys(f, list, e = E.inOut) {
+  if (f <= list[0][0]) return [list[0][1], list[0][2]];
+  for (let i = 1; i < list.length; i++) {
+    const [t1, x1, y1] = list[i];
+    if (f <= t1) {
+      const [t0, x0, y0] = list[i - 1];
+      const p = t1 === t0 ? 1 : e((f - t0) / (t1 - t0));
+      return [x0 + (x1 - x0) * p, y0 + (y1 - y0) * p];
+    }
+  }
+  const l = list[list.length - 1];
+  return [l[1], l[2]];
+}
+const qpt = (a, c, b, t) => { const u = 1 - t; return [u * u * a[0] + 2 * u * t * c[0] + t * t * b[0], u * u * a[1] + 2 * u * t * c[1] + t * t * b[1]]; };
+const lpt = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+
+/* ---------- SVG 도우미 ---------- */
+function s(tag, attrs = {}, kids = []) {
+  const n = document.createElementNS(NS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  for (const c of kids) if (c != null && c !== false) n.append(typeof c === "string" ? document.createTextNode(c) : c);
+  return n;
+}
+const txt = (x, y, str, cls = "t t-sm", anchor = "middle") => s("text", { x, y, class: cls, "text-anchor": anchor }, [str]);
+function at(n, x, y, sc = 1) { n.setAttribute("transform", `translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${Math.max(0, sc).toFixed(3)})`); }
+function op(n, v) { n.setAttribute("opacity", clamp(v, 0, 1).toFixed(3)); }
+function draw(p, v) { op(p, v > 0 ? 1 : 0); p.setAttribute("stroke-dashoffset", (1 - clamp(v, 0, 1)).toFixed(4)); }
+function tw(str, size) {
+  let w = 0;
+  for (const ch of str) { const c = ch.codePointAt(0); w += c >= 0x2e80 ? size : ch === " " ? size * 0.3 : size * 0.58; }
+  return w;
+}
+function pop(n, f, t0, x, y, base = 1) { const k = spring(f - t0); at(n, x, y, base * k); op(n, k * 3); }
+function fadeUp(n, f, t0, x, y, len = 14) { const p = interp(f, [t0, t0 + len], [0, 1]); at(n, x, y + (1 - p) * 14); op(n, p); }
+function typed(n, full, f, t0, t1) { n.textContent = full.slice(0, Math.round(interp(f, [t0, t1], [0, [...full].length], E.lin))); }
+
+/* ---------- 부품 ---------- */
+const DOT = { ok: "f-ok", warn: "f-warn", danger: "f-danger" };
+const chipW = (text, kind) => tw(text, 14) + 28 + (DOT[kind] ? 16 : 0);
+function chip(x, y, text, kind = "soft") {
+  const w = chipW(text, kind), dot = DOT[kind];
+  // 바깥 g 는 비워 두어 at()·pop() 이 움직이고, 안쪽 g 가 제자리를 갖는다.
+  return s("g", {}, [s("g", { transform: `translate(${x} ${y})` }, [
+    s("rect", { x: -w / 2, y: -14, width: w, height: 28, rx: 14, class: kind === "soft" ? "chip-soft" : "chip-flat" }),
+    dot && s("circle", { cx: -w / 2 + 18, cy: 0, r: 5, class: dot }),
+    txt(dot ? 8 : 0, 5, text, "t t-xs"),
+  ])]);
+}
+const wrap = (...kids) => s("g", {}, kids);
+function person() { return s("g", { class: "person" }, [s("circle", { cx: 0, cy: -14, r: 13 }), s("path", { d: "M-24,26 a24,22 0 0 1 48,0 z" })]); }
+function pc(label, lang) {
+  const screen = s("g");
+  const g = s("g", {}, [
+    s("rect", { x: -100, y: -80, width: 200, height: 130, rx: 10, class: "f-surface s-line" }),
+    s("rect", { x: -90, y: -70, width: 180, height: 110, rx: 5, class: "tile" }),
+    screen,
+    s("rect", { x: -14, y: 50, width: 28, height: 14, class: "f-strong" }),
+    s("rect", { x: -44, y: 64, width: 88, height: 8, rx: 4, class: "f-strong" }),
+    label && txt(0, 102, label, "t t-md"),
+    lang && chip(0, 130, lang),
+  ]);
+  return { g, screen };
+}
+function server(label) {
+  return s("g", {}, [
+    s("rect", { x: -48, y: -70, width: 96, height: 140, rx: 10, class: "f-surface s-line" }),
+    ...[-48, -24, 0].map((y) => s("rect", { x: -32, y, width: 64, height: 14, rx: 3, class: "f-strong" })),
+    s("circle", { cx: 26, cy: 48, r: 6, class: "f-ok" }),
+    label && txt(0, 102, label, "t t-md"),
+  ]);
+}
+function cloud(label) {
+  return s("g", {}, [
+    s("circle", { cx: -62, cy: 10, r: 40, class: "f-soft" }),
+    s("circle", { cx: -12, cy: -16, r: 54, class: "f-soft" }),
+    s("circle", { cx: 48, cy: 0, r: 44, class: "f-soft" }),
+    s("circle", { cx: 86, cy: 22, r: 28, class: "f-soft" }),
+    s("rect", { x: -100, y: 6, width: 214, height: 44, rx: 22, class: "f-soft" }),
+    txt(4, 18, label, "t t-sm t-b"),
+  ]);
+}
+function phone() {
+  return s("g", {}, [
+    s("rect", { x: -34, y: -64, width: 68, height: 128, rx: 12, class: "f-surface s-line" }),
+    s("rect", { x: -28, y: -52, width: 56, height: 100, rx: 4, class: "tile" }),
+    s("circle", { cx: 0, cy: 56, r: 3.5, class: "f-strong" }),
+  ]);
+}
+function btn(label, w, kind = "accent") {
+  const r = s("rect", { x: -w / 2, y: -20, width: w, height: 40, rx: 8, class: `b-${kind}` });
+  const t = txt(0, 6, label, `t t-sm bt-${kind}`);
+  const g = s("g", {}, [r, t]);
+  g.kind = (k) => { r.setAttribute("class", `b-${k}`); t.setAttribute("class", `t t-sm bt-${k}`); };
+  g.label = (l) => { if (t.textContent !== l) t.textContent = l; };
+  return g;
+}
+function bubble(text) {
+  const w = tw(text, 17) + 34;
+  return s("g", {}, [
+    s("rect", { x: -w / 2, y: -22, width: w, height: 42, rx: 12, class: "f-surface s-line" }),
+    s("path", { d: "M-8,19 L0,30 L8,19 Z", class: "f-surface" }),
+    txt(0, 6, text, "t t-sm"),
+  ]);
+}
+function lock() {
+  return s("g", {}, [s("path", { d: "M-6,-2 v-6 a6,6 0 0 1 12,0 v6", class: "lock-arc" }), s("rect", { x: -10, y: -3, width: 20, height: 16, rx: 3, class: "f-ok" })]);
+}
+function win(w, h, title) {
+  return s("g", {}, [
+    s("rect", { x: -w / 2, y: -h / 2, width: w, height: h, rx: 12, class: "f-surface s-line" }),
+    s("rect", { x: -w / 2 + 1, y: -h / 2 + 1, width: w - 2, height: 36, rx: 11, class: "f-strong" }),
+    ...[0, 1, 2].map((i) => s("circle", { cx: -w / 2 + 22 + i * 18, cy: -h / 2 + 19, r: 5, class: "f-bg" })),
+    txt(-w / 2 + 84, -h / 2 + 25, title, "t t-xs t-dim", "start"),
+  ]);
+}
+function fileIcon(ext, name) {
+  return s("g", {}, [
+    s("path", { d: "M-26,-34 h36 l16,16 v52 h-52 z", class: "f-strong s-line" }),
+    s("path", { d: "M10,-34 v16 h16", class: "s-line nofill" }),
+    txt(0, 10, ext, "t t-xs t-b"),
+    name && txt(0, 60, name, "t t-sm"),
+  ]);
+}
+function docLines(w, h) {
+  const g = s("g", {}, [s("rect", { x: -w / 2, y: -h / 2, width: w, height: h, rx: 6, class: "f-surface s-line" })]);
+  g.append(s("rect", { x: -w / 2 + w * 0.08, y: -h / 2 + h * 0.1, width: w * 0.5, height: h * 0.09, rx: 3, class: "f-accent" }));
+  for (let i = 0; i < 4; i++) g.append(s("rect", { x: -w / 2 + w * 0.08, y: -h / 2 + h * (0.28 + i * 0.12), width: w * (i % 2 ? 0.5 : 0.62), height: h * 0.05, rx: 2, class: "f-strong" }));
+  [0.5, 0.75, 0.35, 0.9].forEach((v, i) => g.append(s("rect", { x: w * 0.12 + i * w * 0.08, y: h * 0.38 - h * 0.5 * v, width: w * 0.05, height: h * 0.5 * v, class: i === 3 ? "f-ok" : "f-accent" })));
+  return g;
+}
+function cursorG() { return s("path", { d: "M0,0 L0,27 L7,21 L12,32 L17,30 L12,19 L21,19 Z", class: "cursor" }); }
+function useCursor(g, list, clicks) {
+  const rip = clicks.map(() => { const c = s("circle", { r: 0, class: "ripple" }); g.append(c); return c; });
+  const cur = cursorG(); g.append(cur);
+  return (f) => {
+    const [x, y] = keys(f, list);
+    at(cur, x, y);
+    op(cur, f < list[0][0] ? 0 : interp(f, [list[0][0], list[0][0] + 6], [0, 1]) * (f > list[list.length - 1][0] + 24 ? interp(f, [list[list.length - 1][0] + 24, list[list.length - 1][0] + 32], [1, 0]) : 1));
+    clicks.forEach((t0, i) => {
+      const [cx, cy] = keys(t0, list);
+      const p = (f - t0) / 14;
+      if (p < 0 || p > 1) { op(rip[i], 0); return; }
+      rip[i].setAttribute("cx", cx); rip[i].setAttribute("cy", cy);
+      rip[i].setAttribute("r", (4 + 24 * E.out(p)).toFixed(1));
+      op(rip[i], 0.9 * (1 - p));
+    });
+  };
+}
+function press(n, f, t0, x, y, base = 1) { at(n, x, y, base * (1 - 0.07 * Math.sin(Math.PI * clamp((f - t0) / 8, 0, 1)))); }
+function waves(g, x, y) {
+  const arcs = [18, 32, 46].map((r) => { const a = s("path", { d: `M ${r * 0.7} ${-r * 0.7} A ${r} ${r} 0 0 1 ${r * 0.7} ${r * 0.7}`, class: "wave" }); return a; });
+  const w = s("g", {}, arcs); at(w, x, y); g.append(w);
+  return (f, on) => arcs.forEach((a, i) => op(a, on ? 0.25 + 0.75 * (Math.sin(f / 4 - i * 1.3) + 1) / 2 : 0));
+}
+
+/* ---------- 장면 ---------- */
+const SCENES = [];
+
+/* 설치 장면용 부품 */
+function term(w, h, title) {
+  const g = win(w, h, title);
+  g.append(s("rect", { x: -w / 2 + 1, y: -h / 2 + 37, width: w - 2, height: h - 46, class: "f-bg" }));
+  g.line = (i, cls = "t t-sm mono") => { const t = txt(-w / 2 + 22, -h / 2 + 70 + i * 34, "", cls, "start"); g.append(t); return t; };
+  return g;
+}
+function folder(label) {
+  return s("g", {}, [
+    s("path", { d: "M-40,-28 h28 l8,8 h44 v52 h-80 z", class: "f-soft s-accent" }),
+    label && txt(0, 58, label, "t t-sm"),
+  ]);
+}
+function checkbox(label, size = "t-sm") {
+  const box = s("rect", { x: 0, y: -11, width: 22, height: 22, rx: 5, class: "f-bg s-line" });
+  const tick = s("path", { d: "M5,0 l5,5 l8,-10", class: "check" });
+  const g = s("g", {}, [box, tick, label && txt(34, 6, label, `t ${size}`, "start")]);
+  g.set = (on) => { box.setAttribute("class", on ? "f-accent" : "f-bg s-line"); op(tick, on ? 1 : 0); };
+  return g;
+}
+function addrBar(url) {
+  const lk = lock();
+  const g = s("g", {}, [s("rect", { x: -280, y: -16, width: 560, height: 32, rx: 16, class: "f-bg" }), lk, txt(-236, 6, url, "t t-xs mono", "start")]);
+  at(lk, -258, 2, 0.7);
+  return g;
+}
+const out = (t, text, f, t0) => { t.textContent = f >= t0 ? text : ""; };
+
+/* 1. 받은 압축 파일 */
+SCENES.push({
+  title: "받은 압축 파일", dur: 300,
+  subs: [[0, "받은 visionmeeting.zip 에는 프로그램과 빈 설정 양식, 설치 설명서가 들어 있습니다."],
+         [140, "설정·키·인증서는 들어 있지 않습니다. 이 PC 에서 새로 만듭니다."],
+         [225, "회의에 참석만 하는 PC 는 아무것도 설치하지 않습니다. 이 설명은 서버 PC 용입니다."]],
+  note: "참석만 하는 PC 는 브라우저(Chrome·Edge)만 있으면 되고, 사내망 주소로 들어올 때만 서버 운영자에게 받은 rootCA.pem 을 한 번 설치합니다.",
+  build(g) {
+    const zip = fileIcon("ZIP", "visionmeeting.zip"); g.append(zip);
+    const arrow = s("path", { d: "M 300 320 L 400 320", pathLength: 1, class: "wire" }); g.append(arrow);
+    const box = (title, sub) => wrap(s("rect", { x: 0, y: 0, width: 380, height: 470, rx: 14, class: "f-surface s-line" }),
+      txt(24, 42, title, "t t-md", "start"), sub && txt(24, 68, sub, "t t-xs t-dim", "start"));
+    const row = (b, tag, name, desc, dashed) => {
+      const r = wrap(s("rect", { x: 0, y: -22, width: 64, height: 44, rx: 8, class: dashed ? "interim" : "f-soft" }),
+        txt(32, 5, tag, "t t-xs t-b"), txt(80, -3, name, "t t-xs t-b mono", "start"), txt(80, 19, desc, "t t-xs t-dim", "start"));
+      b.append(r); return r;
+    };
+    const inBox = box("들어 있는 것"); g.append(inBox);
+    const inRows = [["DIR", "app · static", "프로그램"], ["BAT", "run.bat · program.bat · stop.bat", "켜기 · 화면 열기 · 끄기"],
+      ["PY", "launcher.py · requirements.txt", "실행기 · 부품 목록"], ["ENV", ".env.example", "빈 설정 양식"], ["MD", "docs\\deploy.md", "글로 된 설치 설명서"]]
+      .map(([a, b, c]) => row(inBox, a, b, c, false));
+    const outBox = box("없는 것", "이 PC 에서 새로 만듭니다"); g.append(outBox);
+    const outRows = [[".env", ".env", "설정 · 키"], ["DIR", "certs", "인증서"], ["DIR", ".venv", "실행 환경"], ["DIR", "data", "중계 사용량 기록"]]
+      .map(([a, b, c]) => row(outBox, a, b, c, true));
+    const note = chip(640, 634, "참석만 하는 PC 는 설치가 필요 없습니다", "ok"); g.append(note);
+    return (f) => {
+      pop(zip, f, 4, 190, 310, 1.5);
+      draw(arrow, interp(f, [24, 40], [0, 1]));
+      fadeUp(inBox, f, 30, 420, 100);
+      inRows.forEach((r, i) => fadeUp(r, f, 44 + i * 12, 24, 120 + i * 72));
+      fadeUp(outBox, f, 140, 840, 100);
+      outRows.forEach((r, i) => fadeUp(r, f, 150 + i * 12, 24, 130 + i * 82));
+      fadeUp(note, f, 228, 0, 0);
+    };
+  },
+});
+
+/* 2. Python 설치 */
+SCENES.push({
+  title: "Python 설치", dur: 330,
+  subs: [[0, "먼저 python.org 에서 Python 3.10 이상을 내려받습니다."],
+         [95, "설치 첫 화면에서 «Add python.exe to PATH»를 꼭 체크하고 «Install Now»를 누릅니다."],
+         [240, "PowerShell 에서 python --version 을 입력해 버전이 나오면 성공입니다."]],
+  note: "PATH 체크를 빠뜨리면 python 명령을 찾지 못합니다. 이때는 설치 파일을 다시 열어 «Modify»에서 PATH 를 켜거나, 지우고 다시 설치합니다.",
+  build(g) {
+    const br = win(600, 250, "python.org"); g.append(br);
+    br.append(txt(0, -22, "Python 내려받기", "t t-lg"));
+    const dl = btn("Download Python 3.x", 260); br.append(dl);
+    const inst = win(540, 300, "Python 설치"); g.append(inst);
+    inst.append(txt(-240, -78, "Install Python 3.x", "t t-md", "start"));
+    const now = btn("Install Now", 220); inst.append(now);
+    const prog = wrap(s("rect", { x: 0, y: -8, width: 480, height: 16, rx: 8, class: "f-strong" }));
+    const progFill = s("rect", { x: 0, y: -8, width: 0, height: 16, rx: 8, class: "f-accent" }); prog.append(progFill);
+    at(prog, -240, -10); inst.append(prog);
+    const okText = txt(-240, 40, "설치 완료 · Setup was successful", "t t-sm t-b t-ok", "start"); inst.append(okText);
+    const ring = s("rect", { x: -254, y: 70, width: 330, height: 40, rx: 8, class: "ring" }); inst.append(ring);
+    const cb = checkbox("Add python.exe to PATH"); at(cb, -240, 90); inst.append(cb);
+    const tm = term(600, 140, "PowerShell"); g.append(tm);
+    const l0 = tm.line(0), l1 = tm.line(1, "t t-sm mono t-ok");
+    const cursor = useCursor(g, [[10, 640, 600], [36, 400, 253], [100, 400, 253], [126, 671, 450], [150, 671, 450], [162, 790, 353]], [40, 130, 165]);
+    return (f) => {
+      pop(br, f, 4, 400, 210); op(br, spring(f - 4) * 3 * interp(f, [62, 80], [1, 0.45]));
+      if (f >= 38) press(dl, f, 40, 0, 40); else at(dl, 0, 40);
+      pop(inst, f, 62, 900, 360);
+      cb.set(f >= 130);
+      op(ring, f >= 95 && f < 130 ? 0.4 + 0.6 * (Math.sin(f / 4) + 1) / 2 : 0);
+      if (f >= 163) press(now, f, 165, -110, -10); else at(now, -110, -10);
+      op(now, f < 175 ? 1 : 0); op(prog, f >= 175 ? 1 : 0);
+      progFill.setAttribute("width", interp(f, [175, 230], [0, 480], E.inOut).toFixed(1));
+      op(okText, interp(f, [232, 240], [0, 1]));
+      pop(tm, f, 244, 400, 590);
+      typed(l0, "PS> python --version", f, 250, 272); out(l1, "Python 3.12.x", f, 282);
+      cursor(f);
+    };
+  },
+});
+
+/* 3. 압축 풀기 */
+SCENES.push({
+  title: "압축 풀기", dur: 270,
+  subs: [[0, "압축 파일을 마우스 오른쪽 버튼으로 눌러 «모두 압축 풀기»로 풉니다."],
+         [100, "푸는 곳은 영문 경로로 합니다. 예: C:\\visionmeeting"],
+         [175, "경로에 한글이나 띄어쓰기가 있으면 안 됩니다."]],
+  note: "바탕 화면이나 OneDrive 처럼 동기화되는 폴더보다 C:\\visionmeeting 같은 짧은 경로가 좋습니다.",
+  build(g) {
+    const zip = fileIcon("ZIP", "visionmeeting.zip"); g.append(zip);
+    const menu = wrap(s("rect", { x: 0, y: 0, width: 200, height: 96, rx: 8, class: "f-surface s-line" }),
+      s("rect", { x: 4, y: 4, width: 192, height: 30, rx: 5, class: "f-soft" }),
+      txt(16, 25, "모두 압축 풀기...", "t t-xs t-b", "start"), txt(16, 57, "열기", "t t-xs t-dim", "start"), txt(16, 83, "복사", "t t-xs t-dim", "start"));
+    g.append(menu);
+    const arrow = s("path", { d: "M 300 300 L 410 300", pathLength: 1, class: "wire" }); g.append(arrow);
+    const dir = folder("C:\\visionmeeting"); g.append(dir);
+    const minis = ["BAT", "PY", "ENV"].map((e) => { const m = fileIcon(e); g.append(m); return m; });
+    const card = (text, kind, label) => {
+      const w = 470;
+      return wrap(s("rect", { x: -w / 2, y: -50, width: w, height: 100, rx: 12, class: kind === "ok" ? "final" : "f-surface s-line" }),
+        txt(-w / 2 + 22, 8, text, "t t-sm t-b mono", "start"), chip(w / 2 - 70, 0, label, kind));
+    };
+    const good = card("C:\\visionmeeting", "ok", "좋음"); g.append(good);
+    const bad = card("C:\\사용자\\바탕 화면\\비전 미팅", "danger", "안 됨"); g.append(bad);
+    const badNote = txt(960, 500, "한글·띄어쓰기가 들어간 경로", "t t-xs t-danger"); g.append(badNote);
+    const cursor = useCursor(g, [[5, 420, 520], [22, 190, 300], [30, 190, 300], [40, 262, 318]], [24, 42]);
+    return (f) => {
+      pop(zip, f, 4, 190, 300, 1.3);
+      op(menu, f >= 26 && f < 50 ? 1 : 0); at(menu, 196, 300);
+      draw(arrow, interp(f, [52, 70], [0, 1]));
+      pop(dir, f, 66, 500, 300, 1.5);
+      minis.forEach((m, i) => pop(m, f, 84 + i * 8, 430 + i * 70, 470, 0.6));
+      fadeUp(good, f, 110, 960, 250);
+      fadeUp(bad, f, 178, 960, 420);
+      op(badNote, interp(f, [190, 200], [0, 1]));
+      cursor(f);
+    };
+  },
+});
+
+/* 4. 실행 환경 만들기 */
+SCENES.push({
+  title: "실행 환경 만들기", dur: 330,
+  subs: [[0, "PowerShell 을 열고 프로그램 폴더로 갑니다."],
+         [42, "python -m venv .venv 로 이 프로그램만 쓰는 실행 환경을 만듭니다."],
+         [98, "이어서 필요한 부품을 설치합니다. «Successfully installed»가 나오면 끝입니다."]],
+  note: "부품을 내려받으므로 인터넷 연결이 필요합니다. 실행 환경이 꼬이면 .venv 폴더만 지우고 이 단계를 다시 합니다.",
+  build(g) {
+    const tm = term(1000, 400, "PowerShell"); g.append(tm);
+    const L = [tm.line(0), tm.line(1), tm.line(2), tm.line(3, "t t-sm mono t-dim"), tm.line(4, "t t-sm mono t-dim"),
+      tm.line(5, "t t-sm mono t-dim"), tm.line(6, "t t-sm mono t-dim"), tm.line(7, "t t-sm mono t-ok")];
+    const venv = wrap(folder(".venv")); g.append(venv);
+    const venvNote = chip(0, 0, "실행 환경 폴더가 생깁니다", "ok"); g.append(venvNote);
+    const net = chip(400, 600, "인터넷 연결이 필요합니다"); g.append(net);
+    return (f) => {
+      pop(tm, f, 2, 640, 300);
+      typed(L[0], "PS> cd C:\\visionmeeting", f, 10, 34);
+      typed(L[1], "PS> python -m venv .venv", f, 44, 72);
+      typed(L[2], "PS> .venv\\Scripts\\pip install -r requirements.txt", f, 100, 150);
+      out(L[3], "Collecting fastapi==0.115.6", f, 160);
+      out(L[4], "Collecting uvicorn[standard]==0.34.0", f, 172);
+      out(L[5], "Collecting python-docx==1.2.0", f, 184);
+      out(L[6], "…", f, 196);
+      out(L[7], "Successfully installed fastapi uvicorn python-docx …", f, 222);
+      pop(venv, f, 80, 960, 590, 0.9);
+      pop(venvNote, f, 88, 1105, 600);
+      fadeUp(net, f, 110, 0, 0);
+    };
+  },
+});
+
+/* 5. 인증서 만들기 */
+SCENES.push({
+  title: "인증서 만들기", dur: 390,
+  subs: [[0, "브라우저가 마이크를 쓰려면 HTTPS 인증서가 필요합니다. 먼저 mkcert 를 설치합니다."],
+         [95, "새 PowerShell 창에서 mkcert -install 을 실행하고, 보안 경고에서 «예»를 누릅니다."],
+         [205, "만들어진 공개 인증서 rootCA.pem 을 프로그램의 certs 폴더에 복사합니다."],
+         [315, "새 인증서이므로, 이 서버에 사내망으로 들어오는 PC 는 새 rootCA.pem 을 설치해야 합니다."]],
+  note: "mkcert -install 은 Windows 신뢰 저장소를 바꾸는 단계라 운영자가 직접 합니다. 예전 PC 의 certs\\ca 폴더(인증기관 개인키)는 옮겨 쓰지 않습니다. certs 폴더가 없으면 먼저 만듭니다(글 설명서 3-4 의 명령에 들어 있음).",
+  build(g) {
+    const tm = term(700, 380, "PowerShell"); g.append(tm);
+    const L = [tm.line(0), tm.line(1, "t t-sm mono t-ok"), tm.line(2), tm.line(3, "t t-sm mono t-ok"), tm.line(4)];
+    const newWin = chip(410, 500, "설치 후 PowerShell 창을 새로 엽니다"); g.append(newWin);
+    const dlg = win(470, 230, "보안 경고"); g.append(dlg);
+    dlg.append(txt(-210, -40, "인증 기관(CA)의 인증서를", "t t-sm", "start"));
+    dlg.append(txt(-210, -10, "설치하시겠습니까?", "t t-sm t-b", "start"));
+    const yes = btn("예", 100); const no = btn("아니요", 100, "ghost"); dlg.append(yes); dlg.append(no); at(no, 180, 70);
+    const dir = folder("certs"); g.append(dir);
+    const fly = wrap(s("rect", { x: -54, y: -16, width: 108, height: 32, rx: 6, class: "f-soft s-accent" }), txt(0, 6, "rootCA.pem", "t t-xs t-b mono")); g.append(fly);
+    const done = chip(0, 0, "rootCA.pem ✓", "ok"); g.append(done);
+    const warn = chip(640, 668, "이 서버에 사내망으로 접속하는 PC 는 새 rootCA.pem 설치", "warn"); g.append(warn);
+    const cursor = useCursor(g, [[140, 700, 520], [160, 1072, 293], [180, 1072, 293]], [166]);
+    return (f) => {
+      pop(tm, f, 2, 410, 270);
+      typed(L[0], "PS> winget install FiloSottile.mkcert", f, 10, 44);
+      out(L[1], "Successfully installed", f, 58);
+      fadeUp(newWin, f, 70, 0, 0); op(newWin, interp(f, [70, 84], [0, 1]) * interp(f, [200, 214], [1, 0]));
+      typed(L[2], "PS> mkcert -install", f, 100, 118);
+      pop(dlg, f, 128, 1000, 220); op(dlg, spring(f - 128) * 3 * interp(f, [176, 186], [1, 0]));
+      if (f >= 164) press(yes, f, 166, 70, 70); else at(yes, 70, 70);
+      out(L[3], "The local CA is now installed in the system trust store!", f, 186);
+      typed(L[4], "PS> Copy-Item \"$(mkcert -CAROOT)\\rootCA.pem\" certs\\rootCA.pem", f, 210, 262);
+      pop(dir, f, 200, 1000, 500, 1.3);
+      const [x, y] = qpt([520, 286], [800, 300], [1000, 500], interp(f, [268, 300], [0, 1], E.inOut));
+      at(fly, x, y); op(fly, f >= 266 && f <= 302 ? 1 : 0);
+      pop(done, f, 300, 1000, 600);
+      fadeUp(warn, f, 318, 0, 0);
+      cursor(f);
+    };
+  },
+});
+
+/* 6. 설정 파일 .env */
+SCENES.push({
+  title: "설정 파일 .env", dur: 390,
+  subs: [[0, ".env.example 을 복사해 .env 를 만들고 메모장으로 엽니다."],
+         [70, "회의 개설 코드를 정해 ROOM_PASSCODE 에 넣습니다."],
+         [105, "Cloudflare 값 네 개는 이 PC 운영자 본인의 Cloudflare 계정에서 받아 넣습니다."],
+         [225, "값 앞뒤에 꺾쇠나 따옴표를 붙이지 않습니다. 다 넣었으면 저장합니다."]],
+  note: "Cloudflare 값을 비우면 외부 중계 없이 동작합니다(회사 방화벽 뒤 참석자는 연결이 안 될 수 있음). 사용량 조회 토큰의 권한은 «Account Analytics Read» 하나만 줍니다. Cloudflare 대시보드의 예산 알림도 켜 둡니다.",
+  build(g) {
+    const tm = term(620, 150, "PowerShell"); g.append(tm);
+    const l0 = tm.line(0), l1 = tm.line(1);
+    const pad = win(900, 400, ".env - 메모장"); g.append(pad);
+    const title = pad.querySelector("text");
+    const rows = [["ROOM_PASSCODE=", "●●●●●●", 75], ["CLOUDFLARE_TURN_KEY_ID=", "••••••••", 110], ["CLOUDFLARE_TURN_KEY_API_TOKEN=", "••••••••", 128],
+      ["CLOUDFLARE_ACCOUNT_ID=", "••••••••", 146], ["CLOUDFLARE_API_TOKEN=", "••••••••", 164]];
+    const vals = rows.map(([k], i) => {
+      const y = -110 + i * 54;
+      pad.append(txt(-424, y, k, "t t-sm mono t-dim", "start"));
+      const v = txt(-424 + k.length * 10.2 + 4, y, "", "t t-sm mono t-b t-accent", "start"); pad.append(v); return v;
+    });
+    const notes = [chip(270, -116, "회의 개설 코드 · 직접 정함"), chip(270, -35, "TURN 키 · Realtime → TURN Server"), chip(270, 73, "사용량 조회 · 권한 Analytics Read 하나만")];
+    notes.forEach((n) => pad.append(n));
+    const own = chip(270, 150, "내 계정 값 · 예전 PC 의 키 아님", "warn"); pad.append(own);
+    const noQuote = chip(450, 668, "값 앞뒤에 < > · 따옴표 붙이지 않기", "danger"); g.append(noQuote);
+    const save = chip(900, 668, "Ctrl+S 로 저장", "ok"); g.append(save);
+    return (f) => {
+      pop(tm, f, 2, 360, 130);
+      typed(l0, "PS> Copy-Item .env.example .env", f, 8, 34);
+      typed(l1, "PS> notepad .env", f, 40, 55);
+      pop(pad, f, 60, 760, 430);
+      rows.forEach(([, v, t0], i) => typed(vals[i], v, f, t0, t0 + 16));
+      fadeUp(notes[0], f, 80, 0, 0); fadeUp(notes[1], f, 118, 0, 0); fadeUp(notes[2], f, 156, 0, 0);
+      fadeUp(own, f, 190, 0, 0);
+      fadeUp(noQuote, f, 230, 0, 0);
+      fadeUp(save, f, 300, 0, 0);
+      title.textContent = f >= 75 && f < 304 ? "*.env - 메모장" : ".env - 메모장";
+    };
+  },
+});
+
+/* 7. 선택 도구 */
+SCENES.push({
+  title: "선택 도구", dur: 270,
+  subs: [[0, "해외 참석자를 받으려면 cloudflared 를 설치합니다."],
+         [95, "회의 정리를 쓰려면 이 PC 에 Claude Code 나 Codex 를 설치하고 로그인합니다."],
+         [190, "둘 다 선택입니다. 없어도 화상회의와 자막은 그대로 됩니다."]],
+  note: "회의 정리 엔진이 없으면 그 기능만 «사용 불가»와 이유로 표시됩니다. 가짜 요약을 만들지 않습니다.",
+  build(g) {
+    const card = (title, sub, icon, cmds, miss) => {
+      const c = wrap(s("rect", { x: 0, y: 0, width: 480, height: 400, rx: 16, class: "f-surface s-line" }),
+        txt(24, 44, title, "t t-md", "start"), txt(24, 70, sub, "t t-xs t-dim", "start"));
+      at(icon, 240, 160); c.append(icon);
+      c.append(s("rect", { x: 24, y: 236, width: 432, height: 32 + cmds.length * 26, rx: 8, class: "f-bg" }));
+      cmds.forEach((t, i) => c.append(txt(40, 258 + i * 26, t, "t t-xs mono", "start")));
+      c.append(chip(240, 360, miss, "warn"));
+      g.append(c); return c;
+    };
+    const a = card("외부 참석 링크용", "해외·사내망 밖 참석자", cloud("터널"), ["winget install Cloudflare.cloudflared"], "없으면: 외부 참석 링크만 못 씀");
+    const b = card("회의 정리(요약)용", "자막으로 회의 요약 만들기", docLines(150, 96), ["Claude Code 설치 → claude 로그인", "또는 npm i -g @openai/codex", "→ codex login"], "없으면: 회의 정리만 «사용 불가»");
+    const okc = chip(640, 630, "화상회의·자막은 없어도 그대로 됩니다", "ok"); g.append(okc);
+    return (f) => {
+      fadeUp(a, f, 6, 140, 120);
+      fadeUp(b, f, 98, 660, 120);
+      fadeUp(okc, f, 192, 0, 0);
+    };
+  },
+});
+
+/* 8. 실행 */
+SCENES.push({
+  title: "실행", dur: 360,
+  subs: [[0, "프로그램 폴더의 run.bat 을 두 번 누릅니다."],
+         [50, "처음 실행할 때 방화벽 창이 뜨면 «개인 네트워크»만 체크하고 허용합니다."],
+         [132, "첫 실행에서는 서버 인증서를 자동으로 만들고, 접속 주소를 보여 줍니다."],
+         [250, "브라우저가 열리고 주소창에 자물쇠가 보이면 서버가 켜진 것입니다."]],
+  note: "회의 화면만 다시 열 때는 program.bat, 서버를 끌 때는 stop.bat 을 씁니다. 창을 그냥 닫았다면 stop.bat 으로 정리합니다.",
+  build(g) {
+    g.append(s("rect", { x: 60, y: 90, width: 440, height: 530, rx: 14, class: "f-surface s-line" }));
+    g.append(txt(84, 124, "C:\\visionmeeting", "t t-xs t-dim mono", "start"));
+    const hi = s("rect", { x: 100, y: 290, width: 100, height: 110, rx: 10, class: "f-soft" }); g.append(hi);
+    const icons = [[folder("app"), 150, 210], [folder("static"), 260, 210], [folder("docs"), 370, 210],
+      [fileIcon("BAT", "run.bat"), 150, 340], [fileIcon("BAT", "program.bat"), 260, 340], [fileIcon("BAT", "stop.bat"), 370, 340],
+      [fileIcon("PY", "launcher.py"), 150, 490], [fileIcon("ENV", ".env"), 260, 490], [fileIcon("TXT", "requirements"), 370, 490]];
+    icons.forEach(([n, x, y]) => { at(n, x, y, 0.8); g.append(n); });
+    const fw = win(560, 300, "Windows 보안 경고"); g.append(fw);
+    fw.append(txt(-250, -80, "방화벽이 Python 의 일부 기능을 막았습니다", "t t-sm t-b", "start"));
+    fw.append(txt(-250, -52, "이 앱이 통신할 네트워크를 고르세요", "t t-xs t-dim", "start"));
+    const priv = checkbox("개인 네트워크 (회사·집)"); at(priv, -250, -6); fw.append(priv); priv.set(true);
+    const pub = checkbox("공용 네트워크 (카페·공항)"); at(pub, -250, 40); fw.append(pub); pub.set(false);
+    const allow = btn("액세스 허용", 150); fw.append(allow);
+    const tm = term(600, 250, "VisionMeeting server"); g.append(tm);
+    const L = [tm.line(0, "t t-sm mono t-dim"), tm.line(1), tm.line(2, "t t-sm mono t-ok"), tm.line(3, "t t-sm mono t-ok")];
+    const br = win(600, 170, "브라우저");
+    const ab = addrBar("https://localhost:8443"); at(ab, 0, -24); br.append(ab);
+    br.append(txt(0, 40, "VisionMeeting", "t t-lg")); g.append(br);
+    const cursor = useCursor(g, [[6, 520, 600], [26, 150, 340], [44, 150, 340], [96, 1030, 355], [112, 1030, 355]], [30, 38, 108]);
+    return (f) => {
+      op(hi, interp(f, [30, 36], [0, 1]) * interp(f, [70, 90], [1, 0]));
+      pop(fw, f, 54, 880, 250); op(fw, spring(f - 54) * 3 * interp(f, [116, 126], [1, 0]));
+      if (f >= 106) press(allow, f, 108, 150, 105); else at(allow, 150, 105);
+      pop(tm, f, 128, 880, 300);
+      typed(L[0], "… 기존 루트 인증기관으로 재발급합니다.", f, 138, 160);
+      typed(L[1], "재발급 및 검증 완료.", f, 166, 178);
+      typed(L[2], "내 PC 접속: https://localhost:8443", f, 186, 208);
+      typed(L[3], "참가자 PC 접속: https://192.168.0.10:8443", f, 212, 236);
+      pop(br, f, 250, 880, 548);
+      cursor(f);
+    };
+  },
+});
+
+/* 9. 설치 확인 */
+SCENES.push({
+  title: "설치 확인", dur: 330,
+  subs: [[0, "설치가 끝나면 네 가지를 확인합니다."],
+         [35, "주소창에 자물쇠가 있고 경고가 없습니다."],
+         [85, "회의 화면 배지가 초록색 «외부 중계 준비됨 · Cloudflare» 입니다."],
+         [145, "다른 PC 에서 들어와 영상과 자막이 오가는지 봅니다."],
+         [205, "예전 PC 의 설정·키 파일은 이 PC 에 없어야 합니다."]],
+  note: "배지가 빨간 «외부 중계 없음»이면 배지에 마우스를 올려 이유를 봅니다. 대부분 .env 의 Cloudflare 값이 비었거나 틀린 경우입니다.",
+  build(g) {
+    g.append(s("rect", { x: 70, y: 90, width: 560, height: 530, rx: 14, class: "f-surface s-line" }));
+    g.append(txt(96, 132, "설치 확인", "t t-md", "start"));
+    const items = ["주소창에 자물쇠 · 경고 없음", "배지가 초록 «외부 중계 준비됨»", "다른 PC 와 영상·자막이 오감", "예전 PC 의 .env · certs\\ca · data 없음"];
+    const Y = [200, 300, 400, 500], T = [40, 90, 150, 210];
+    const boxes = items.map((t, i) => { const c = checkbox(t); at(c, 100, Y[i]); g.append(c); return c; });
+    const ab = addrBar("https://localhost:8443"); g.append(ab);
+    const badge = chip(0, 0, "외부 중계 준비됨 · Cloudflare", "ok"); g.append(badge);
+    const pa = pc(null), pb = pc(null); [pa, pb].forEach((p) => { const pp = wrap(person()); p.screen.append(pp); at(pp, 0, -12); });
+    const link = s("path", { d: "M 820 395 L 1040 395", pathLength: 1, class: "wire" });
+    g.append(link); g.append(pa.g); g.append(pb.g);
+    const pk = [0, 1].map(() => { const c = s("circle", { r: 5, class: "pkt" }); g.append(c); return c; });
+    const capB = bubble("Hello · 안녕하세요"); g.append(capB);
+    const gone = [chip(0, 0, ".env (예전 PC)", "plain"), chip(0, 0, "certs\\ca", "plain"), chip(0, 0, "data", "plain")];
+    gone.forEach((c) => g.append(c));
+    const strike = [0, 1, 2].map(() => { const l = s("rect", { height: 3, class: "f-danger" }); g.append(l); return l; });
+    const none = chip(0, 0, "없음", "ok"); g.append(none);
+    const gx = [760, 900, 1000];
+    return (f) => {
+      boxes.forEach((c, i) => c.set(f >= T[i]));
+      fadeUp(ab, f, 36, 940, Y[0] - 6);
+      pop(badge, f, 88, 940, Y[1] - 6);
+      pop(pa.g, f, 146, 760, Y[2] - 4, 0.42); pop(pb.g, f, 152, 1100, Y[2] - 4, 0.42);
+      draw(link, interp(f, [158, 176], [0, 1]));
+      pk.forEach((c, k) => { if (f < 178) { op(c, 0); return; } const t = ((f - 178) / 40 + k / 2) % 1; c.setAttribute("cx", (820 + 220 * (k ? 1 - t : t)).toFixed(1)); c.setAttribute("cy", 395); op(c, 1); });
+      pop(capB, f, 182, 930, 352);
+      gone.forEach((c, i) => fadeUp(c, f, 206 + i * 6, gx[i], Y[3] - 6));
+      strike.forEach((l, i) => {
+        const w = [130, 92, 62][i]; l.setAttribute("x", gx[i] - w / 2); l.setAttribute("y", Y[3] - 7.5);
+        l.setAttribute("width", (w * interp(f, [226 + i * 6, 238 + i * 6], [0, 1])).toFixed(1)); op(l, f >= 226 + i * 6 ? 1 : 0);
+      });
+      pop(none, f, 250, 1120, Y[3] - 6);
+    };
+  },
+});
+
+/* 10. 참석자 안내·막힐 때 */
+SCENES.push({
+  title: "참석자 안내·막힐 때", dur: 330,
+  subs: [[0, "사내 참석자에게는 certs 폴더의 rootCA.pem 한 파일만 줍니다."],
+         [100, "이름에 key 가 들어간 파일은 절대 주지 않습니다."],
+         [170, "run.bat 창에 오류가 나오면 메시지대로 고칩니다. 자세한 표는 docs\\deploy.md 5장에 있습니다."]],
+  note: "참석자 PC 에 인증서를 설치하는 방법은 회의 화면의 «사용 설명서»(/help) 2장에 있습니다.",
+  build(g) {
+    const ca = fileIcon("PEM", "rootCA.pem"); g.append(ca);
+    const P = [[470, 170], [470, 320], [470, 470]];
+    const wires = P.map(([x, y]) => { const p = s("path", { d: `M 220 300 L ${x - 50} ${y}`, pathLength: 1, class: "wire ok" }); g.append(p); return p; });
+    const pcs = P.map(() => { const p = pc("참석자 PC"); const lk = lock(); p.screen.append(lk); at(lk, 0, -14, 1.6); g.append(p.g); return { g: p.g, lk }; });
+    const key = fileIcon("KEY", "rootCA-key.pem"); g.append(key);
+    const xm = wrap(s("line", { x1: -22, y1: -22, x2: 22, y2: 22, class: "xmark" }), s("line", { x1: 22, y1: -22, x2: -22, y2: 22, class: "xmark" })); g.append(xm);
+    const never = chip(0, 0, "절대 주지 않음", "danger"); g.append(never);
+    g.append(s("rect", { x: 640, y: 90, width: 580, height: 530, rx: 14, class: "f-surface s-line" }));
+    g.append(txt(664, 132, "run.bat 창에 이런 말이 나오면", "t t-md", "start"));
+    const errs = [["mkcert가 없습니다", "mkcert 설치 후 창을 새로 엽니다"], ["… 새 CA는 만들지 않습니다.", "mkcert -install 을 먼저 합니다"],
+      ["… 기존 CA가 일치하지 않습니다", "이 PC 의 rootCA.pem 을 다시 복사합니다"], ["8443 포트를 다른 서비스가 사용 중", "그 프로그램을 끄고 다시 실행합니다"]]
+      .map(([m, fix]) => { const r = wrap(txt(0, 0, m, "t t-xs mono t-danger", "start"), txt(0, 28, "→ " + fix, "t t-sm", "start")); g.append(r); return r; });
+    const more = chip(930, 588, "자세한 표: docs\\deploy.md 5장"); g.append(more);
+    return (f) => {
+      pop(ca, f, 4, 170, 300, 1.2);
+      wires.forEach((w, i) => draw(w, interp(f, [20 + i * 8, 46 + i * 8], [0, 1])));
+      pcs.forEach(({ g: n, lk }, i) => { pop(n, f, 14 + i * 8, P[i][0], P[i][1], 0.42); op(lk, interp(f, [60 + i * 8, 70 + i * 8], [0, 1])); });
+      pop(key, f, 100, 170, 500, 0.9);
+      pop(xm, f, 116, 170, 486);
+      pop(never, f, 124, 330, 500);
+      errs.forEach((r, i) => fadeUp(r, f, 176 + i * 16, 664, 190 + i * 96));
+      fadeUp(more, f, 250, 0, 0);
+    };
+  },
+});
+
+/* ---------- 재생기 ---------- */
+const stage = document.getElementById("stage");
+const capEl = document.getElementById("caption-line");
+const bigPlay = document.getElementById("big-play");
+const playBtn = document.getElementById("play-btn");
+const timeEl = document.getElementById("time");
+const track = document.getElementById("track");
+const chapNav = document.getElementById("chapters");
+const speedSel = document.getElementById("speed");
+
+let total = 0;
+for (const sc of SCENES) {
+  sc.start = total; total += sc.dur;
+  sc.g = s("g"); stage.append(sc.g);
+  sc.update = sc.build(sc.g);
+  sc.g.style.display = "none";
+}
+const TOTAL = total;
+const POSTER = 280; // 1장 다 그려진 장면을 표지로
+track.setAttribute("aria-valuemax", String(Math.round(TOTAL / FPS)));
+
+const segs = SCENES.map((sc) => { const d = document.createElement("div"); d.className = "seg"; d.style.flex = `${sc.dur} 1 0`; const i = document.createElement("i"); d.append(i); track.append(d); return { d, i }; });
+const chaps = SCENES.map((sc, k) => {
+  const b = document.createElement("button"); b.type = "button"; b.className = "chap";
+  b.innerHTML = `<b>${k + 1}</b><span></span>`; b.lastChild.textContent = sc.title;
+  b.addEventListener("click", () => { seek(sc.start); play(); });
+  chapNav.append(b); return b;
+});
+const list = document.getElementById("script-list");
+for (const sc of SCENES) {
+  const li = document.createElement("li");
+  const box = document.createElement("div");
+  const h = document.createElement("h3"); h.textContent = sc.title;
+  const p = document.createElement("p"); p.textContent = sc.subs.map(([, t]) => t).join(" ");
+  box.append(h, p);
+  if (sc.note) { const n = document.createElement("p"); n.className = "note"; n.textContent = sc.note; box.append(n); }
+  li.append(box); list.append(li);
+}
+
+let frame = POSTER, playing = false, started = false, speed = 1, last = 0, current = -1, lastSub = null;
+const fmt = (sec) => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, "0")}`;
+function sceneAt(f) { for (let i = SCENES.length - 1; i >= 0; i--) if (f >= SCENES[i].start) return i; return 0; }
+
+function render() {
+  const f = Math.floor(frame), i = sceneAt(f), sc = SCENES[i];
+  if (i !== current) {
+    if (current >= 0) SCENES[current].g.style.display = "none";
+    sc.g.style.display = ""; current = i;
+    chaps.forEach((b, k) => b.setAttribute("aria-current", k === i ? "true" : "false"));
+  }
+  const lf = f - sc.start;
+  let o = 1;
+  if (i > 0) o = Math.min(o, interp(lf, [0, 8], [0, 1], E.lin));
+  if (i < SCENES.length - 1) o = Math.min(o, interp(lf, [sc.dur - 8, sc.dur], [1, 0], E.lin));
+  op(sc.g, o);
+  sc.update(lf);
+  let sub = ""; for (const [t, line] of sc.subs) if (lf >= t) sub = line;
+  if (sub !== lastSub) { capEl.textContent = sub || " "; lastSub = sub; }
+  const shown = started ? f : 0;
+  segs.forEach(({ d, i: bar }, k) => {
+    const s0 = SCENES[k];
+    bar.style.width = `${clamp((shown - s0.start) / s0.dur, 0, 1) * 100}%`;
+    d.classList.toggle("on", started && k === i);
+  });
+  timeEl.textContent = `${fmt(shown / FPS)} / ${fmt(TOTAL / FPS)}`;
+  track.setAttribute("aria-valuenow", String(Math.round(shown / FPS)));
+  track.setAttribute("aria-valuetext", `${fmt(shown / FPS)}, ${sc.title}`);
+}
+function syncUi() {
+  const atEnd = frame >= TOTAL - 1;
+  playBtn.innerHTML = `<svg class="icon ${playing || !atEnd ? "solid" : ""}"><use href="#i-${playing ? "pause" : atEnd ? "replay" : "play"}"></use></svg>`;
+  playBtn.setAttribute("aria-label", playing ? "멈춤" : atEnd ? "다시 보기" : "재생");
+  const showBig = !playing && (!started || atEnd);
+  bigPlay.hidden = !showBig;
+  bigPlay.classList.toggle("replay", atEnd);
+  bigPlay.innerHTML = `<svg class="icon"><use href="#i-${atEnd ? "replay" : "play"}"></use></svg>`;
+  bigPlay.setAttribute("aria-label", atEnd ? "다시 보기" : "처음부터 재생");
+}
+function tick(now) {
+  if (!playing) return;
+  const dt = Math.min(100, now - last); last = now;
+  frame += dt / 1000 * FPS * speed;
+  if (frame >= TOTAL - 1) { frame = TOTAL - 1; playing = false; render(); syncUi(); return; }
+  render(); requestAnimationFrame(tick);
+}
+function play() {
+  if (playing) return;
+  if (!started || frame >= TOTAL - 1) frame = 0;
+  started = true; playing = true; last = performance.now();
+  render(); syncUi(); requestAnimationFrame(tick);
+}
+function pause() { playing = false; syncUi(); }
+function toggle() { playing ? pause() : play(); }
+function seek(f) { started = true; frame = clamp(f, 0, TOTAL - 1); render(); syncUi(); }
+
+playBtn.addEventListener("click", toggle);
+bigPlay.addEventListener("click", play);
+speedSel.addEventListener("change", () => { speed = Number(speedSel.value) || 1; });
+let dragging = false;
+const seekX = (e) => { const r = track.getBoundingClientRect(); seek(clamp((e.clientX - r.left) / r.width, 0, 1) * (TOTAL - 1)); };
+track.addEventListener("pointerdown", (e) => { dragging = true; track.setPointerCapture(e.pointerId); seekX(e); });
+track.addEventListener("pointermove", (e) => { if (dragging) seekX(e); });
+track.addEventListener("pointerup", () => { dragging = false; });
+track.addEventListener("pointercancel", () => { dragging = false; });
+document.addEventListener("keydown", (e) => {
+  const tag = e.target.tagName;
+  if (tag === "BUTTON" || tag === "SELECT" || tag === "INPUT" || e.altKey || e.ctrlKey || e.metaKey) return;
+  if (e.key === " ") { e.preventDefault(); toggle(); }
+  else if (e.key === "ArrowRight") { e.preventDefault(); seek((started ? frame : 0) + 5 * FPS); }
+  else if (e.key === "ArrowLeft") { e.preventDefault(); seek((started ? frame : 0) - 5 * FPS); }
+  else if (e.key === "Home" && e.target === track) { e.preventDefault(); seek(0); }
+  else if (e.key === "End" && e.target === track) { e.preventDefault(); seek(TOTAL - 1); }
+});
+
+/* 테마 전환 — 선택은 이 브라우저에만 기억 */
+const themeBtn = document.getElementById("theme-btn");
+function syncTheme() {
+  const dark = document.documentElement.dataset.theme !== "light";
+  themeBtn.innerHTML = `<svg class="icon"><use href="#i-${dark ? "sun" : "moon"}"></use></svg>`;
+  themeBtn.setAttribute("aria-label", dark ? "밝은 화면으로 바꾸기" : "어두운 화면으로 바꾸기");
+  themeBtn.title = themeBtn.getAttribute("aria-label");
+}
+themeBtn.addEventListener("click", () => {
+  const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem("visionmeeting-explainer-theme", next); } catch (error) { /* 기억 못 해도 전환은 된다 */ }
+  syncTheme();
+});
+syncTheme();
+render(); syncUi();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+# secrets
+.env
+*.pem
+*.key
+certs/
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# runtime data (내부 중계 집계 등 — 바이트 수만, Q34)
+data/
+
+# backups / scratch
+*.bak
+
+# os
+Thumbs.db
+desktop.ini

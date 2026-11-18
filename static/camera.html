@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>현장 카메라 — VisionMeeting</title>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<script>
+  (function () {
+    var theme = "dark";
+    try { theme = localStorage.getItem("translator-theme") === "light" ? "light" : "dark"; } catch (e) {}
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<!-- Lucide 아이콘 (lucide-static v0.460.0, ISC License) -->
+<svg xmlns="http://www.w3.org/2000/svg" hidden>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+  <symbol id="i-switch-camera" viewBox="0 0 24 24"><path d="M11 19H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5"/><path d="M13 5h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-5"/><circle cx="12" cy="12" r="3"/><path d="m18 22-3-3 3-3"/><path d="m6 2 3 3-3 3"/></symbol>
+</svg>
+
+<main class="center-view">
+  <section class="card">
+    <div class="card-head">
+      <h1>현장 카메라</h1>
+      <button type="button" class="icon-btn theme-toggle" aria-label="화면 테마 바꾸기" title="화면 테마 바꾸기">
+        <svg class="icon"><use href="#i-sun"></use></svg>
+      </button>
+    </div>
+
+    <div id="cam-conn" class="badge badge-unknown">
+      <span class="dot"></span><span class="badge-text">연결 준비 중</span>
+    </div>
+
+    <div class="preview camera-preview">
+      <video id="cam-video" autoplay muted playsinline></video>
+      <p id="cam-empty" class="preview-empty">카메라를 여는 중…</p>
+    </div>
+    <p id="cam-status" class="reason" aria-live="polite"></p>
+
+    <div class="form-row">
+      <div class="field grow">
+        <button type="button" id="cam-flip" class="ghost control" disabled><svg class="icon"><use href="#i-switch-camera"></use></svg>전면/후면 전환</button>
+      </div>
+      <div class="field grow"><button type="button" id="cam-leave" class="ghost control danger" disabled>연결 끊기</button></div>
+    </div>
+
+    <p class="reason">이 휴대폰은 <b>영상만</b> 보냅니다. 소리는 보내지 않고 다른 지점 영상도 표시하지 않습니다.
+      화면이 꺼지면 영상이 멈출 수 있으니 화면을 켜 둔 채로 두세요.</p>
+  </section>
+</main>
+
+<script src="/static/rtc.js"></script>
+<script src="/static/camera.js"></script>
+</body>
+</html>

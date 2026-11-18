@@ -1,0 +1,640 @@
+/* DESIGN.md - «회의실 가독성 우선» 토큰과 레이아웃
+   밝은 테마 = 프로젝트 DESIGN.md 값, 어두운 테마(기본) = 전역 DESIGN.md colors-dark 값 */
+:root {
+  --bg: #eef2f7;
+  --bg-top: #f8fafc;
+  --surface: #ffffff;
+  --surface-2: #f6f8fb;
+  --surface-strong: #e8eef7;
+  --border: #d7dee8;
+  --text: #172033;
+  --text-dim: #5c6a7d;
+  --accent: #3159d9;
+  --accent-hover: #274abe;
+  --accent-soft: #eaf0ff;
+  --accent-border: #cdd9ff;
+  --on-accent: #ffffff;
+  --notice-bg: #f3f6ff;
+  --border-strong: #aeb9c8;
+  --ok: #137a4e;
+  --ok-soft: #e9f7f0;
+  --ok-border: #bfe4d1;
+  --warn: #9a5700;
+  --danger: #c63636;
+  --danger-soft: #fdecec;
+  --danger-border: #f3c4c4;
+  --shadow: 0 16px 40px rgba(23, 32, 51, 0.09);
+
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px; --sp-6: 32px;
+  --radius: 8px;
+  --font: "Segoe UI", "Malgun Gothic", system-ui, sans-serif;
+  /* 전역 DESIGN.md Form row: 본문 줄높이 + 입력 패딩(12px) + 테두리 */
+  --control-h: calc(1rem * 1.5 + 2 * 12px + 2px);
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --bg: #10151C;
+  --bg-top: #10151C;
+  --surface: #1A2029;
+  --surface-2: #10151C;
+  --surface-strong: #2A323D;
+  --border: #2A323D;
+  --border-strong: #9AA6B4;
+  --text: #E6EAF0;
+  --text-dim: #9AA6B4;
+  --accent: #5B82E8;
+  --accent-hover: #7396EE;
+  --accent-soft: #22304F;
+  --accent-border: #5B82E8;
+  --on-accent: #1A2029;
+  --notice-bg: #22304F;
+  --ok: #2FA968;
+  --ok-soft: #1A2029;
+  --ok-border: #2FA968;
+  --warn: #C79A3A;
+  --danger: #E4655F;
+  --danger-soft: #1A2029;
+  --danger-border: #E4655F;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+/* .center-view / #meeting-view 의 display:flex 가 [hidden] 기본값을 이기므로 명시한다. */
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg) 100%);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 16px;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* --- 입장 화면 --- */
+.center-view {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-4);
+}
+
+.card {
+  width: 100%;
+  max-width: 480px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: var(--sp-6);
+  box-shadow: var(--shadow);
+}
+
+.card h1 {
+  margin: 0 0 var(--sp-4);
+  font-size: 1.5rem;
+}
+
+.tag {
+  font-size: 0.8125rem;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  border-radius: 999px;
+  padding: 2px var(--sp-2);
+  vertical-align: middle;
+}
+
+label {
+  display: block;
+  margin: var(--sp-4) 0 var(--sp-1);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-dim);
+}
+
+input[type="text"], input[type="password"], select {
+  width: 100%;
+  padding: var(--sp-3);
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+input[type="text"]:hover, input[type="password"]:hover, select:hover { border-color: var(--border-strong); }
+input[type="text"]:focus, input[type="password"]:focus, select:focus { border-color: var(--accent); }
+
+.row { display: flex; gap: var(--sp-3); }
+.col { flex: 1; min-width: 0; }
+
+.notice {
+  margin-top: var(--sp-5);
+  padding: var(--sp-4);
+  background: var(--notice-bg);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+}
+
+.notice p { margin: var(--sp-2) 0 var(--sp-3); color: var(--text-dim); line-height: 1.6; }
+
+.check { display: flex; gap: var(--sp-2); align-items: flex-start; margin: 0; color: var(--text); }
+.check input { margin-top: 3px; accent-color: var(--accent); }
+
+.primary {
+  margin-top: var(--sp-5);
+  width: 100%;
+  padding: var(--sp-4);
+  background: var(--accent);
+  color: var(--on-accent);
+  border: none;
+  border-radius: var(--radius);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(49, 89, 217, 0.2);
+  transition: background-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.primary:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
+.primary:disabled { background: var(--surface-strong); color: var(--text-dim); cursor: not-allowed; box-shadow: none; }
+
+.error { color: var(--danger); font-size: 0.875rem; margin-top: var(--sp-3); }
+.reason { color: var(--text-dim); font-size: 0.8125rem; margin: var(--sp-2) 0 0; }
+
+/* --- 상태 배지 --- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.badge .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-dim); }
+.badge-ok .dot { background: var(--ok); }
+.badge-bad .dot { background: var(--danger); }
+.badge-ok { color: var(--ok); background: var(--ok-soft); border-color: var(--ok-border); }
+.badge-bad { color: var(--danger); background: var(--danger-soft); border-color: var(--danger-border); }
+/* 주의(Cloudflare 900 GB 넘음 — 중계 음성만, Q31): 경고색 토큰 재사용 */
+.badge-warn .dot { background: var(--warn); }
+.badge-warn { color: var(--warn); border-color: var(--warn); }
+/* 중계 사용량 문구가 길어 좁은 화면(375px)에서 넘치지 않게 이 배지만 줄을 바꾼다 */
+#relay-quota { max-width: 100%; white-space: normal; }
+
+/* --- 회의 화면 --- */
+#meeting-view { display: flex; flex-direction: column; height: 100vh; }
+
+.topbar {
+  flex: 0 0 auto;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding: var(--sp-3) var(--sp-5);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  box-shadow: 0 4px 14px rgba(23, 32, 51, 0.05);
+}
+
+.topbar-left { display: flex; align-items: baseline; gap: var(--sp-2); }
+.room-label { color: var(--text-dim); font-size: 0.8125rem; }
+.topbar-left strong { font-size: 1.25rem; letter-spacing: 0.06em; }
+.topbar-right { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
+
+/* 윗부분 줄이기(2026-11-18 사용자 요청 — 영상 자리를 넓히려고): 회의 화면 상단의 배지·버튼·선택 상자를 높이 28px 로,
+   여백·간격을 4/8px 로 줄인다. 글자는 최소 크기(0.8125rem) 유지. 참석 지점 줄도 얇게. */
+.topbar { min-height: 0; gap: var(--sp-1) var(--sp-3); padding: var(--sp-1) var(--sp-4); }
+.topbar-left { align-items: center; }
+.topbar-left strong { font-size: 1.125rem; }
+.topbar-right { gap: var(--sp-1) var(--sp-2); }
+.topbar .badge { padding: 0 var(--sp-2); height: 28px; gap: var(--sp-1); }
+.topbar .ghost { height: 28px; padding: 0 var(--sp-2); display: inline-flex; align-items: center; }
+.topbar a.help-link { min-height: 28px; }
+.topbar .engine-select { height: 28px; }
+.topbar .icon-btn { width: 28px; height: 28px; }
+.topbar .icon-btn .icon { width: 16px; height: 16px; }
+#host-controls:not([hidden]) { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-1) var(--sp-2); }
+/* 넓은 화면: 오른쪽 묶음이 통째로 다음 줄로 내려가지 않고 회의 번호 옆에서 시작해 안에서 줄을 바꾼다(1280px 에서 3줄 → 2줄) */
+@media (min-width: 901px) {
+  .topbar { flex-wrap: nowrap; }
+  .topbar-left { flex: 0 0 auto; }
+  .topbar-right { flex: 1 1 auto; min-width: 0; justify-content: flex-end; }
+  #host-controls:not([hidden]) { justify-content: flex-end; }
+}
+#meeting-view .participants { padding: var(--sp-1) var(--sp-4); }
+#meeting-view .participants li { padding: 0 var(--sp-2); }
+.count { color: var(--text-dim); font-size: 0.8125rem; }
+
+.ghost {
+  background: var(--surface);
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--sp-1) var(--sp-3);
+  font-size: 0.8125rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.ghost:hover { color: var(--text); border-color: var(--border-strong); background: var(--surface-2); }
+
+.ghost.danger { color: var(--danger); border-color: var(--danger); }
+
+.participants {
+  flex: 0 0 auto;
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+  list-style: none;
+  margin: 0;
+  padding: var(--sp-2) var(--sp-5);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.8125rem;
+  color: var(--text-dim);
+  background: var(--bg-top);
+}
+
+.participants li { padding: var(--sp-1) var(--sp-3); background: var(--surface); border: 1px solid var(--border); border-radius: 999px; }
+.summary {
+  flex: 0 1 45%;
+  overflow-y: auto;
+  max-width: 900px;
+  width: 100%;
+  margin: var(--sp-3) auto 0;
+  padding: var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--ok);
+  border-radius: var(--radius);
+  box-shadow: 0 6px 18px rgba(23, 32, 51, 0.05);
+}
+
+.summary-head { display: flex; align-items: center; gap: var(--sp-3); margin-bottom: var(--sp-2); }
+.summary-head strong { font-size: 1rem; }
+.summary-head .ghost { margin-left: auto; }
+.summary-tabs { display: flex; gap: var(--sp-1); }
+.summary-tabs button {
+  background: var(--surface-2);
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px var(--sp-3);
+  font-size: 0.8125rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+.summary-tabs button.active { color: var(--accent); background: var(--accent-soft); border-color: var(--accent); }
+.summary-body h3 { font-size: 0.9375rem; margin: var(--sp-3) 0 var(--sp-1); color: var(--text); }
+.summary-body h3:first-child { margin-top: 0; }
+.summary-body ul { margin: 0; padding-left: 1.25em; line-height: 1.5; }
+.summary-body p { margin: 0 0 var(--sp-1); line-height: 1.5; }
+.summary-body .pending { color: var(--text-dim); }
+
+.transcript {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: var(--sp-5);
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.entry {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  padding: var(--sp-4);
+  margin-bottom: var(--sp-3);
+  box-shadow: 0 6px 18px rgba(23, 32, 51, 0.05);
+}
+
+.entry .meta { font-size: 0.8125rem; font-weight: 500; color: var(--text-dim); margin-bottom: var(--sp-2); }
+.entry .translated { font-size: 1.375rem; font-weight: 600; line-height: 1.5; }
+.entry .original { font-size: 1rem; color: var(--text-dim); margin-top: var(--sp-2); line-height: 1.5; }
+/* 브라우저 번역(Q29): 번역 중에는 흐리게, 번역 불가는 경고색 작은 글씨(가짜 번역 대신 이유를 보인다) */
+.entry .translated.pending { color: var(--text-dim); font-weight: 500; font-size: 1rem; }
+.entry .translated.failed { color: var(--warn); font-weight: 500; font-size: 0.9375rem; }
+
+.interim {
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--text-dim);
+  font-size: 1.125rem;
+  background: var(--surface);
+}
+/* Q32: 여러 지점이 동시에 말하면 지점마다 한 줄 */
+.interim-line + .interim-line { margin-top: var(--sp-1); }
+
+.bottombar {
+  flex: 0 0 auto;
+  padding: var(--sp-2) var(--sp-4);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -6px 20px rgba(23, 32, 51, 0.06);
+}
+
+/* 작은 켜기/끄기 버튼(번역 음성·설정 펼치기): 켜짐은 강조색, 꺼짐은 평소 색(꺼짐을 경고색으로 보이지 않게) */
+.talk-options { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--sp-2); max-width: 900px; margin: 0 auto var(--sp-2); }
+.ghost.continuous-toggle[aria-pressed="false"] { color: var(--text-dim); border-color: var(--border); }
+.ghost.continuous-toggle[aria-pressed="true"] { color: var(--accent); border-color: var(--accent-border); background: var(--accent-soft); }
+
+.floor-status {
+  max-width: 900px;
+  margin: var(--sp-1) auto 0;
+  font-size: 0.8125rem;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+/* Q32: 마이크·스피커 버튼 — 작은 버튼으로 «번역 음성» 과 같은 줄(2026-11-16 사용자 요청: 72px 큰 버튼이 너무 크다).
+   켜짐은 강조색 채움, 꺼짐은 위험색 채움(+ «꺼짐» 글자·아이콘, 색만으로 구분하지 않음) — 마이크를 끄면 자막도 멈추므로 다른 작은 버튼보다 눈에 띄게 채운다 */
+.talk {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-1);
+  white-space: nowrap;
+  height: 32px;
+  padding: 0 var(--sp-3);
+  border: none;
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 160ms ease;
+}
+
+.talk .icon { width: 16px; height: 16px; }
+.talk[aria-pressed="false"] { background: var(--danger); color: var(--on-accent); box-shadow: none; }
+.talk:disabled { background: var(--surface-strong); color: var(--text-dim); cursor: not-allowed; box-shadow: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .primary, .talk { transition: none; }
+}
+
+@media (max-width: 900px) {
+  .transcript, .bottombar, .topbar, .participants { padding-left: var(--sp-4); padding-right: var(--sp-4); }
+}
+
+/* --- 영상 | 자막 나란히 (2026-11-16 사용자 요청: 영상 70% · 자막 30%, 마우스로 폭 조절) --- */
+.stage { flex: 1 1 auto; min-height: 0; display: flex; --video-share: 70%; }
+.stage-video { flex: 0 1 var(--video-share); min-width: 0; min-height: 0; display: flex; flex-direction: column; overflow-y: auto; }
+.stage-captions { flex: 1 1 0; min-width: 240px; min-height: 0; display: flex; flex-direction: column;
+  background: var(--bg-top); border-left: 1px solid var(--border); }
+.stage-captions .transcript { max-width: none; padding: var(--sp-4); }
+.stage-captions .interim { max-width: none; width: auto; margin: 0 var(--sp-4) var(--sp-3); }
+.video-wrap { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+/* align-content: start — 영상 자리를 채우려고 늘린 격자에서 타일 줄까지 늘어나 영상 아래 빈 띠가 생겼다(2026-11-16) */
+.stage .video-grid { flex: 1 1 auto; max-height: none; min-height: 0; align-content: start; }
+/* 끌기 막대: 평소엔 얇은 선, 마우스를 올리거나 끄는 중·키보드 초점이면 강조색 */
+.stage-splitter { flex: 0 0 var(--sp-2); position: relative; cursor: col-resize; touch-action: none; }
+.stage-splitter::after { content: ""; position: absolute; top: 0; bottom: 0; left: calc(50% - 1px); width: 2px; background: var(--border); }
+.stage-splitter:hover::after, .stage-splitter:focus-visible::after, body.resizing .stage-splitter::after { background: var(--accent); }
+.stage-splitter:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+body.resizing { cursor: col-resize; user-select: none; }
+body.resizing video { pointer-events: none; }
+/* 넓은 화면: 타일이 영상 자리(video-wrap = 화면 분석·회의 정리를 뺀 높이) 안에 들어오게 폭을 그 높이(100cqh)에서 계산한다(16:9, 위아래 여백 40px).
+   한 줄 = row1, 두 줄(3~4곳) = row2. 하단 조작부가 높아 칸이 낮으면 타일이 잘려 스크롤이 생겼다(2026-11-16 확인). */
+/* 2026-11-18 사용자 요청 «화상 화면이 작다»: 타일 상한(480px·크게 보기 960px)을 없애 영상 자리(높이·폭)를 다 쓰게 했다. 여백도 8px 로. */
+@media (min-width: 901px) {
+  .video-wrap { container-type: size; }
+  .stage .video-grid { padding: var(--sp-2); border-bottom: 0;
+    --row1: max(160px, calc((100cqh - 24px) * 16 / 9)); --row2: max(120px, calc((100cqh - 32px) / 2 * 16 / 9));
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 45%, var(--row1)), min(480px, var(--row1)))); }
+  /* 칸 수는 화면 수로 정한다. auto-fit 은 칸 최대 폭(row1 ≈ 영상 자리 높이×16/9)으로 몇 칸 들어갈지 세기 때문에
+     상한을 없애면 2곳도 한 칸씩 세로로 쌓였다(2026-11-18 사용자 보고 «바둑판 2곳이 세로»). 2곳 = 가로 두 칸. */
+  .stage .video-grid[data-count="1"] { grid-template-columns: minmax(0, var(--row1)); }
+  .stage .video-grid[data-count="2"] { grid-template-columns: repeat(2, minmax(0, var(--row1))); }
+  .stage .video-grid[data-count="3"], .stage .video-grid[data-count="4"] { grid-template-columns: repeat(2, minmax(0, var(--row2))); }
+  .stage .video-grid[data-count="5"], .stage .video-grid[data-count="6"] { grid-template-columns: repeat(3, minmax(0, var(--row2))); }
+  .stage .video-grid[data-layout="row"] .tile { max-width: var(--row1); }
+  .stage .video-grid[data-layout="focus"] { --main-w: min(100%, max(240px, calc((100cqh - 150px) * 16 / 9))); }
+}
+/* 좁은 화면: 위(영상)·아래(자막)로 쌓고 막대는 숨긴다 */
+/* 화면 높이에 모두 밀어 넣으면 영상이 조작부와 겹치고 자막 칸이 0 이 되어(2026-11-16 375px 확인) 페이지 전체를 세로로 스크롤한다 */
+@media (max-width: 900px) {
+  #meeting-view { height: auto; min-height: 100vh; }
+  .stage { flex: 0 0 auto; flex-direction: column; }
+  .stage-video { flex: 0 0 auto; overflow: visible; }
+  .video-wrap { flex: 0 0 auto; }
+  .stage .video-grid { flex: 0 0 auto; max-height: 55vh; }
+  .stage-splitter { display: none; }
+  .stage-captions { flex: 0 0 auto; height: 40vh; min-height: 200px; min-width: 0; border-left: 0; background: transparent; }
+}
+
+/* --- 1단계: 개설·참여 화면 --- */
+.card { max-width: 560px; }
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); }
+.card-head h1 { margin-bottom: var(--sp-4); }
+
+.icon { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round; flex: 0 0 auto; }
+.icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; padding: 0;
+  background: var(--surface); color: var(--text-dim);
+  border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer;
+}
+.icon-btn:hover { color: var(--text); border-color: var(--border-strong); }
+.head-actions { display: flex; align-items: center; gap: var(--sp-2); margin-bottom: var(--sp-4); }
+a.help-link { display: inline-flex; align-items: center; min-height: 36px; text-decoration: none; white-space: nowrap; }
+a.help-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ghost .icon { width: 14px; height: 14px; vertical-align: -2px; margin-right: var(--sp-1); }
+
+.segmented { display: flex; gap: var(--sp-1); margin-top: var(--sp-4); padding: var(--sp-1);
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); }
+.segmented button { flex: 1; padding: var(--sp-2); background: transparent; color: var(--text-dim);
+  border: 1px solid transparent; border-radius: 6px; font: inherit; font-weight: 600; cursor: pointer; }
+.segmented button[aria-selected="true"] { background: var(--surface); color: var(--accent); border-color: var(--accent-border); }
+
+.secondary { margin-top: var(--sp-4); width: 100%; height: var(--control-h); background: var(--accent-soft);
+  color: var(--accent); border: 1px solid var(--accent-border); border-radius: var(--radius);
+  font: inherit; font-weight: 700; cursor: pointer; }
+.secondary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.created { margin-top: var(--sp-4); padding: var(--sp-4); background: var(--surface-2);
+  border: 1px solid var(--border); border-left: 3px solid var(--ok); border-radius: var(--radius); }
+.created-row { display: flex; justify-content: space-between; gap: var(--sp-3); padding: var(--sp-1) 0; }
+.created-row span { color: var(--text-dim); font-size: 0.875rem; }
+.created-row strong { font-size: 1.25rem; letter-spacing: 0.06em; }
+.created label { margin-top: var(--sp-3); }
+
+/* 전역 DESIGN.md «Form row»: 라벨 길이와 무관하게 상자 아래선을 맞춘다 */
+.form-row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--sp-2) var(--sp-3); }
+.form-row .field { display: flex; flex-direction: column; justify-content: flex-end; min-width: 0; }
+.form-row .field.grow { flex: 1 1 160px; }
+.form-row input, .form-row select, .form-row .control { height: var(--control-h); box-sizing: border-box; }
+.form-row .control { padding: 0 var(--sp-3); font-size: 0.875rem; white-space: nowrap; }
+.form-row label { margin-top: var(--sp-4); }
+.form-row + .form-row { margin-top: var(--sp-2); }
+.ghost[aria-pressed="false"] { color: var(--danger); border-color: var(--danger-border); }
+
+.preview { position: relative; margin-top: var(--sp-4); aspect-ratio: 16 / 9; overflow: hidden;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); }
+.preview video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: block; }
+.preview-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  margin: 0; padding: var(--sp-4); text-align: center; color: var(--text-dim); font-size: 0.875rem; }
+.meter { margin-top: var(--sp-2); height: 8px; background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 999px; overflow: hidden; }
+.meter-fill { width: 0%; height: 100%; background: var(--ok); transition: width 80ms linear; }
+
+.topbar-left .ghost { margin-left: var(--sp-2); align-self: center; }
+
+@media (max-width: 480px) {
+  .card { padding: var(--sp-4); }
+}
+
+/* --- 2단계: 영상 타일 · 회의 중 장치 · 휴대폰 카메라 --- */
+.video-grid {
+  flex: 0 0 auto;
+  display: grid;
+  /* 타일이 1~2개여도 화면 폭 전체로 커지지 않게 최대 480px, 가운데 정렬 (배치 4종은 3단계) */
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 45%), 480px));
+  justify-content: center;
+  gap: var(--sp-2);
+  max-height: 55vh;
+  overflow-y: auto;
+  padding: var(--sp-3) var(--sp-5);
+  border-bottom: 1px solid var(--border);
+}
+.video-grid:empty { display: none; }
+/* 4개(3~4곳)는 2×2. 두 줄이 영상 영역(55vh) 안에 들어가도록 폭을 높이에서 계산한다: 한 줄 높이 ≈ (55vh-40px)/2, 폭 = 높이×16/9 */
+.video-grid[data-count="4"] { grid-template-columns: repeat(2, minmax(0, min(480px, calc((55vh - 40px) * 8 / 9)))); }
+/* 3개도 2×2(설계 §5 «3~4곳: 2×2») — 위 2개, 아래 1개는 가운데. 전엔 넓은 화면에서 3개가 한 줄로 나왔다(2026-11-11 사용자 보고) */
+.video-grid[data-count="3"] { grid-template-columns: repeat(2, minmax(0, min(480px, calc((55vh - 40px) * 8 / 9)))); }
+.video-grid[data-layout="grid"][data-count="3"] .tile:last-child { grid-column: 1 / -1; justify-self: center;
+  width: calc((100% - var(--sp-2)) / 2); }
+/* 높이가 제한된 격자 안에서 타일이 눌려 겹치지 않도록, 16:9 비율은 타일이 아니라 영상이 갖는다. */
+.tile { position: relative; background: var(--surface-strong);
+  border: 1px solid var(--border); border-radius: var(--radius); }
+.tile video { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; border-radius: calc(var(--radius) - 1px); }
+.tile-me video { transform: scaleX(-1); }
+.tile-camera { border-color: var(--accent-border); }
+.tile-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  margin: 0; padding: var(--sp-3); text-align: center; color: var(--text-dim); font-size: 0.875rem;
+  background: var(--surface-strong); border-radius: inherit; }
+.tile-name { position: absolute; left: var(--sp-2); bottom: var(--sp-2); max-width: calc(100% - 2 * var(--sp-2));
+  padding: 2px var(--sp-2); border-radius: 6px; background: var(--surface); color: var(--text);
+  font-size: 0.8125rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* --- 9단계: 회의 정리 엔진 선택(Host) --- */
+.engine-select { width: auto; height: 34px; padding: 0 var(--sp-2); font-size: 0.8125rem; }
+
+/* --- 7단계: 공유 화면 분석(모의 MOSS-VL). MOCK 은 실제 결과처럼 보이지 않게 경고색 배지 --- */
+.vl-panel { max-width: 900px; width: calc(100% - 2 * var(--sp-4)); margin: var(--sp-2) auto 0; padding: var(--sp-2) var(--sp-3);
+  border: 1px dashed var(--border); border-radius: var(--radius); background: var(--surface); font-size: 0.875rem; }
+.vl-head { display: flex; align-items: center; gap: var(--sp-2); }
+.vl-engine { color: var(--text-dim); font-size: 0.8125rem; }
+.vl-text { margin: var(--sp-1) 0 0; color: var(--text-dim); line-height: 1.5; }
+.mock-badge { padding: 1px 8px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em;
+  color: var(--warn); border: 1px solid var(--warn); }
+
+/* --- 3단계: 화면 배치 · 화면 공유 · 말하는 사람 표시 --- */
+/* 크게 보기: 큰 화면 1개를 맨 위 한 줄 전체에, 나머지는 아래 작은 타일 줄. 큰 화면 높이 + 작은 줄이 55vh 안에 들어가게 폭을 높이에서 계산 */
+/* flex 로 줄을 나눈다: 큰 화면은 좌우 여백까지 합쳐 한 줄 전체(100%)를 차지해 혼자 맨 위에, 작은 타일은 아래 줄 가운데 */
+.video-grid[data-layout="focus"] { --main-w: min(100%, 960px, calc((55vh - 170px) * 16 / 9));
+  display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start; }
+.video-grid[data-layout="focus"] .tile { flex: 0 0 160px; }
+/* 가로 한 줄: 모든 화면을 같은 크기로 줄바꿈 없이 나란히(폭에 맞춰 줄어듦, 한 칸 최대 480px) */
+.video-grid[data-layout="row"] { display: flex; flex-wrap: nowrap; justify-content: center; align-items: flex-start; }
+.video-grid[data-layout="row"] .tile { flex: 1 1 0; min-width: 0; max-width: 480px; }
+
+/* 공유 화면을 크게 볼 때(넓은 화면, body.screen-focus — 2026-11-11 사용자 요청 «문서가 너무 작다»):
+   ① 아래 조작부의 장치·배치 두 줄을 접고(«설정 펼치기» 로 다시), ② 작은 타일은 오른쪽 세로 줄, ③ 영상 칸에서 남는 높이(--avail, JS 실측)를 공유 화면이 쓴다.
+   자막은 오른쪽 칸에 그대로 있다(2026-11-16 영상|자막 나란히). 폭은 영상 칸(100%) 기준. 더 크게는 전체 화면 버튼. */
+@media (min-width: 900px) {
+  body.screen-focus:not(.settings-open) #meeting-view .media-bar { display: none; }
+  body.screen-focus .video-grid[data-layout="focus"][data-screen="true"] { display: grid; flex: 1 1 auto; max-height: none; min-height: 0;
+    align-content: start; justify-content: center; grid-auto-rows: min-content;
+    grid-template-columns: minmax(0, min(calc(100% - 172px), calc((var(--avail, 50vh) - 36px) * 16 / 9))) 160px; }
+  body.screen-focus .video-grid[data-screen="true"] .tile-main { grid-column: 1; grid-row: 1 / span 6; width: 100%; margin-inline: 0; }
+  body.screen-focus .video-grid[data-screen="true"] .tile:not(.tile-main) { grid-column: 2; }
+}
+.settings-toggle { display: none; }
+@media (min-width: 900px) { body.screen-focus .settings-toggle { display: inline-flex; } }
+.video-grid[data-layout="focus"] .tile-main { order: -1; flex: 0 0 var(--main-w);
+  margin-inline: calc((100% - var(--main-w)) / 2); }
+.tile-screen video { object-fit: contain; background: #000; }
+.tile-me.tile-screen video { transform: none; }  /* 내 공유 화면은 거울처럼 뒤집지 않는다 */
+.tile-speaking { border-color: var(--ok); box-shadow: 0 0 0 2px var(--ok); }
+/* 화면 공유 버튼: 꺼짐을 경고색(카메라·마이크 꺼짐)으로 보이지 않게 하고, 공유 중일 때만 강조 */
+.ghost.share-toggle[aria-pressed="false"] { color: var(--text-dim); border-color: var(--border); }
+.ghost.share-toggle[aria-pressed="true"] { color: var(--accent); border-color: var(--accent-border); background: var(--accent-soft); }
+.tile-pin { position: absolute; top: var(--sp-2); right: var(--sp-2); display: inline-flex; align-items: center;
+  justify-content: center; width: 32px; height: 32px; padding: 0; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--surface); color: var(--text); cursor: pointer; opacity: 0; transition: opacity 120ms; }
+.tile:hover .tile-pin, .tile-pin:focus-visible { opacity: 1; }
+/* 전체 화면(타일 오른쪽 위 버튼, 2026-11-18 사용자 요청 «전체 화면에서도 자막이 보이게»):
+   타일만이 아니라 영상|자막 칸(#stage)을 모니터 전체로 띄우고, 고른 타일 하나만 영상 칸을 채운다. 자막 칸·폭 조절 막대는 그대로.
+   #stage 로 묶어야 공유 화면 크게 보기(body.screen-focus …)의 격자 규칙을 이긴다. */
+#stage:fullscreen { background: var(--bg); }
+#stage[data-solo] .vl-panel, #stage[data-solo] .summary { display: none; }
+#stage[data-solo] .video-grid { display: flex; flex: 1 1 auto; max-height: none; min-height: 0; padding: 0; border: 0; overflow: hidden; }
+#stage[data-solo] .tile:not(.tile-solo) { display: none; }
+#stage[data-solo] .tile-solo { flex: 1 1 auto; width: auto; min-width: 0; margin: 0; display: flex; align-items: center; justify-content: center;
+  background: #000; border: 0; border-radius: 0; }
+#stage[data-solo] .tile-solo video { width: 100%; height: 100%; aspect-ratio: auto; object-fit: contain; border-radius: 0; }
+#stage[data-solo] .tile-pin { opacity: 1; width: 40px; height: 40px; }
+#stage[data-solo] .tile-name { font-size: 1rem; }
+@media (hover: none) { .tile-pin { opacity: 1; } }
+
+/* 아래 조작부 한 줄(2026-11-18 사용자 요청 «화상 화면이 작다»): 장치·배치 상자와 작은 버튼을 한 줄에, 라벨은 상자 왼쪽.
+   높이 32px 로 통일(Form row: 상자·버튼 높이 같게). 좁으면 줄바꿈. */
+.bar-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--sp-2) var(--sp-3); }
+.media-bar { margin: 0; }
+.bottombar .media-bar.form-row { align-items: center; gap: var(--sp-2); }
+.bottombar .media-bar .field.inline { flex-direction: row; align-items: center; gap: var(--sp-1); }
+.bottombar .media-bar label { margin: 0; white-space: nowrap; }
+.bottombar .media-bar select { width: auto; max-width: 160px; height: 32px; padding: 0 var(--sp-2); font-size: 0.8125rem; }
+.bottombar .media-bar .control { height: 32px; padding: 0 var(--sp-2); font-size: 0.8125rem; display: inline-flex; align-items: center; gap: var(--sp-1); }
+.bottombar .media-bar .control .icon { width: 16px; height: 16px; }
+.bottombar .talk-options { margin: 0; }
+.media-status { max-width: 900px; margin: 0 auto var(--sp-1); text-align: center; color: var(--warn); font-size: 0.8125rem; }
+.ghost.control:disabled { opacity: 0.6; cursor: not-allowed; }
+
+#cam-status + .form-row { margin-top: var(--sp-3); }
+.camera-preview video { transform: none; }
+.camera-preview video.mirrored { transform: scaleX(-1); }
+
+.dialog { width: min(420px, calc(100vw - 2 * var(--sp-4))); padding: var(--sp-5); color: var(--text);
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); }
+.dialog::backdrop { background: rgba(0, 0, 0, 0.55); }
+.dialog h2 { margin: 0 0 var(--sp-2); font-size: 1.25rem; }
+.qr-box { display: flex; justify-content: center; margin-top: var(--sp-4); }
+.qr-box canvas { width: 264px; max-width: 100%; height: auto; border-radius: var(--radius); }
+.qr-timer { display: block; margin: var(--sp-2) 0 0; text-align: center; }
+.qr-link { margin-top: var(--sp-3); font-size: 0.8125rem; color: var(--text-dim); }
+.qr-link input { margin-top: var(--sp-2); font-size: 0.8125rem; }
+
+@media (max-width: 900px) {
+  .video-grid { padding-left: var(--sp-4); padding-right: var(--sp-4); }
+}
